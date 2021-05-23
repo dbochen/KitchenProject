@@ -7,8 +7,7 @@ const App = (): JSX.Element =>
     <header className="App-header">
       <img src={logo} className="App-logo" alt="logo"/>
       <p>
-        Hello world! Hello world!Hello world!Hello world!Hello world!Hello world!Hello world!Hello world!Hello
-        world!Hello world!Hello world!Hello world!Hello world!
+        Hello world!
       </p>
     </header>
   </div>
