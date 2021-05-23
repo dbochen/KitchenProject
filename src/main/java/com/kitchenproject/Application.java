@@ -1,3 +1,5 @@
+package com.kitchenproject;
+
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
