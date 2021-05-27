@@ -1,4 +1,4 @@
-package com.example.KitchenProject;
+package com.example.kitchenproject;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
