@@ -1,4 +1,4 @@
-package com.example.KitchenProject;
+package com.example.kitchenproject;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,9 @@ public class RecipeControllerTest {
 
     @Test
     public void shouldReturnDefaultMessage() throws Exception {
-        this.mockMvc.perform(get("/recipe")).andDo(print()).andExpect(status().isOk()).
-         andExpect(jsonPath("$", hasSize(3)));
+        this.mockMvc.perform(get("/recipe"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
     }
 }

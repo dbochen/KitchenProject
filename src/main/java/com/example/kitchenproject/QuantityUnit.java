@@ -1,11 +1,10 @@
-package com.example.KitchenProject;
+package com.example.kitchenproject;
 
 public enum QuantityUnit {
     GRAM,
-    SPOON,
+    TEA_SPOON,
     TABLE_SPOON,
     CUP,
     LITER,
-    MILILITER
-
+    MILLILITER
 }

@@ -1,12 +1,10 @@
-package com.example.KitchenProject;
+package com.example.kitchenproject;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
+@Data
 @AllArgsConstructor
-@Getter
-@Setter
 public class Ingredient {
     private String name;
     private int quantity;

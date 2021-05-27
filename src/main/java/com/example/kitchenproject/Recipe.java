@@ -1,20 +1,15 @@
-package com.example.KitchenProject;
+package com.example.kitchenproject;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.List;
 
+@Data
 @AllArgsConstructor
-@Getter
-@Setter
 public class Recipe {
     private String name;
     private List<Ingredient> ingredients;
     private String source;
-    private int time;
-    private CookingLevel level;
-
-
+    private int timeInMinutes;
 }
