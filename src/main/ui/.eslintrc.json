@@ -9,6 +9,7 @@
   ],
   "rules": {
     "max-len": ["error", { "code": 120 }],
-    "semi": "off"
+    "semi": "off",
+    "object-curly-spacing": ["error", "always"]
   }
 }
