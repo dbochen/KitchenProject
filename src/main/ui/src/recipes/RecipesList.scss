@@ -1,0 +1,12 @@
+.RecipesList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+
+  &-header {
+    font-weight: 700;
+    font-size: 25px;
+    margin-bottom: 20px;
+  }
+}
