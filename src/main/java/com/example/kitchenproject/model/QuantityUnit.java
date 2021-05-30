@@ -1,4 +1,4 @@
-package com.example.kitchenproject;
+package com.example.kitchenproject.model;
 
 public enum QuantityUnit {
     GRAM,
