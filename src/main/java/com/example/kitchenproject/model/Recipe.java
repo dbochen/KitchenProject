@@ -1,4 +1,4 @@
-package com.example.kitchenproject;
+package com.example.kitchenproject.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
