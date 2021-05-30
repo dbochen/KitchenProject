@@ -34,4 +34,11 @@ class RecipeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(6)));
     }
+
+    @Test
+    void shouldReturnBadRequestWhenLimitForIngredientsIsNegative() throws Exception {
+        this.mockMvc.perform(get("/ingredients").queryParam("limit", "-1"))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
 }

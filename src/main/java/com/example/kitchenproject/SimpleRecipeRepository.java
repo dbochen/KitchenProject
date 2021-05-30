@@ -48,12 +48,14 @@ public class SimpleRecipeRepository implements RecipeRepository {
     }
 
     @Override
-    public List<String> getAllIngredientNames() {
+    public List<String> getIngredientsNames(String search, int limit) {
         return RECIPES.stream()
                 .map(Recipe::getIngredients)
                 .flatMap(Collection::stream)
                 .map(Ingredient::getName)
                 .distinct()
+                .filter(name -> name.startsWith(search))
+                .limit(limit)
                 .collect(toList());
     }
 }

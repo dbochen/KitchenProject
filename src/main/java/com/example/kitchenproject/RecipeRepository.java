@@ -7,5 +7,5 @@ import java.util.List;
 public interface RecipeRepository {
     List<Recipe> getAllRecipes();
 
-    List<String> getAllIngredientNames();
+    List<String> getIngredientsNames(String search, int limit);
 }
