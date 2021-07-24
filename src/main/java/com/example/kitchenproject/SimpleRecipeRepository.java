@@ -83,7 +83,7 @@ public class SimpleRecipeRepository implements RecipeRepository {
                 .flatMap(Collection::stream)
                 .map(QuantifiedIngredient::getIngredient)
                 .distinct()
-                .filter(name -> name.startsWith(search))
+                .filter(ingredient -> ingredient.getName().startsWith(search))
                 .limit(limit)
                 .collect(toList());
     }
