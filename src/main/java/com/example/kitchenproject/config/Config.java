@@ -1,4 +1,4 @@
-package com.example.KitchenProject.config;
+package com.example.kitchenproject.config;
 
 public class Config {
     private Config() {

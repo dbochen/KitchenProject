@@ -1,14 +1,19 @@
 export type Recipe = {
   name: string,
-  ingredients: Ingredient[],
+  quantifiedIngredients: QuantifiedIngredient[],
   source: string,
   timeInMinutes: number
 }
 
-export type Ingredient = {
-  name: string,
+export type QuantifiedIngredient = {
+  ingredient: Ingredient,
   quantity: number,
   unit: QuantityUnit
+}
+
+export type Ingredient = {
+  name: string,
+  id: number,
 }
 
 export type QuantityUnit = "GRAM"

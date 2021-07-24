@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Recipe {
     private String name;
-    private List<Ingredient> ingredients;
+    private List<QuantifiedIngredient> quantifiedIngredients;
     private String source;
     private int timeInMinutes;
 }
