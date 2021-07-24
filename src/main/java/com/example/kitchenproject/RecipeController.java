@@ -1,5 +1,6 @@
 package com.example.kitchenproject;
 
+import com.example.kitchenproject.model.Ingredient;
 import com.example.kitchenproject.model.Recipe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -12,7 +13,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
 
-import static com.example.KitchenProject.config.Config.UI_ORIGIN;
+import static com.example.kitchenproject.config.Config.UI_ORIGIN;
 
 @RestController
 @CrossOrigin(origins = UI_ORIGIN)
@@ -26,16 +27,16 @@ public class RecipeController {
     }
 
     @GetMapping("/recipes")
-    public List<Recipe> getRecipes() {
-        return recipeRepository.getAllRecipes();
+    public List<Recipe> getRecipes(@RequestParam(required = false, defaultValue = "") String sort) {
+        return recipeRepository.getAllRecipes(sort);
     }
 
     // todo: adjust to model changes, return List<Ingredient>
     @GetMapping("/ingredients")
-    public List<String> getIngredients(
+    public List<Ingredient> getIngredients(
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "10") @Valid @Min(1) int limit
-    ) {
-        return recipeRepository.getIngredientsNames(search, limit);
+    )  {
+        return recipeRepository.getAllIngredients(search, limit);
     }
 }

@@ -1,4 +1,4 @@
-import { Ingredient, Recipe } from "./model";
+import { QuantifiedIngredient, Recipe } from "./model";
 import { formatUnit } from "./formatUnit";
 import "./RecipesListItem.scss"
 
@@ -8,10 +8,12 @@ type RecipeListItemProps = {
 
 const RecipesListItem = ({ recipe }: RecipeListItemProps): JSX.Element => {
 
-  const getIngredientString = (ingredient: Ingredient) =>
-    `${ingredient.name} ${ingredient.quantity} ${formatUnit(ingredient.quantity, ingredient.unit)}`;
+  const getIngredientString = (ingredient: QuantifiedIngredient) =>
+    `${ingredient.ingredient.name} ${ingredient.quantity} ${formatUnit(ingredient.quantity, ingredient.unit)}`;
 
-  const ingredients = recipe.ingredients.map(ingredient => getIngredientString(ingredient)).join(", ");
+  const ingredients = recipe.quantifiedIngredients
+    .map(ingredient => getIngredientString(ingredient))
+    .join(", ");
 
   return (
     // todo: replace with recipe.id
