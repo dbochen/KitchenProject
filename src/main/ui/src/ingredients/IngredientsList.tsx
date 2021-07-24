@@ -15,7 +15,7 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
 
   const fetchIngredients = async (query: string): Promise<void> => {
     const response = await networkService.getIngredients(query, 5);
-    setFoundIngredients(response.data)
+    setFoundIngredients(response)
   }
 
   useEffect(() => {
@@ -23,10 +23,8 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
   }, [searchQuery]);
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>): void => {
-    console.log("onInputChange")
     const textContent = event.target.value
-    console.log("textContent", textContent)
-    setSearchQuery(textContent ?? "")
+    setSearchQuery(textContent)
   }
 
   const onSearchResultIngredientClick = (ingredient: string): void => {
@@ -41,6 +39,7 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
         <div
           className={"IngredientsList-searchResults--ingredient"}
           onClick={() => onSearchResultIngredientClick(ingredient)}
+          key={ingredient}
         >
           {ingredient}
         </div>
@@ -71,6 +70,7 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
       <i className="gg-search"/>
       <input
         className={"IngredientsList-input"}
+        data-testid={"IngredientsList-input"}
         placeholder={RecipesStrings.INGREDIENTS_SEARCH_INPUT_PLACEHOLDER}
         onChange={onInputChange}
       />
