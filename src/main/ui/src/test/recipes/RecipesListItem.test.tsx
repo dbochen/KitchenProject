@@ -8,19 +8,28 @@ describe("RecipesListItem", () => {
       name: "Recipe",
       source: "Source",
       timeInMinutes: 10,
-      ingredients: [
+      quantifiedIngredients: [
         {
-          name: "Ingredient 1",
+          ingredient: {
+            name: "Ingredient 1",
+            id: 1,
+          },
           unit: "LITER",
           quantity: 1
         },
         {
-          name: "Ingredient 2",
+          ingredient: {
+            name: "Ingredient 2",
+            id: 2,
+          },
           unit: "TEA_SPOON",
           quantity: 3
         },
         {
-          name: "Ingredient 3",
+          ingredient: {
+            name: "Ingredient 3",
+            id: 3,
+          },
           unit: "CUP",
           quantity: 0.5
         }

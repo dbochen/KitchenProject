@@ -1,10 +1,14 @@
 import { fireEvent, render } from "@testing-library/react";
 import IngredientsList from "../../ingredients/IngredientsList";
+import { Ingredient } from "../../recipes/model";
 import { NetworkServiceProvider } from "../../networkService";
 
 describe("IngredientsList", () => {
   test("displays the list of ingredients returned by the service", async () => {
-    const networkService = mockNetworkService(["Ingredient 1", "Ingredient 2"])
+    const networkService = mockNetworkService([
+      { name: "Ingredient 1", id: 1 },
+      { name: "Ingredient 2", id: 2 },
+    ])
     const { findByText, findByTestId } = render(<IngredientsList networkService={networkService}/>)
     const input = await findByTestId("IngredientsList-input")
 
@@ -15,7 +19,7 @@ describe("IngredientsList", () => {
   })
 })
 
-const mockNetworkService = (ingredients: string[]): NetworkServiceProvider => ({
+const mockNetworkService = (ingredients: Ingredient[]): NetworkServiceProvider => ({
     getRecipes: jest.fn(),
     getIngredients: jest.fn().mockImplementation(() => ingredients),
   }

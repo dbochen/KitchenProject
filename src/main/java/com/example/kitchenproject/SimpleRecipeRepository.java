@@ -45,6 +45,7 @@ public class SimpleRecipeRepository implements RecipeRepository {
     @Override
     public List<Recipe> getAllRecipes(String sort) {
         List<Integer> ids = Arrays.stream(sort.split(","))
+                .filter(id -> !id.equals(""))
                 .map(Integer::parseInt)
                 .collect(toList());
 

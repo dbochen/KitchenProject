@@ -35,7 +35,7 @@ const mockNetworkService = (recipes: Recipe[]): NetworkServiceProvider => ({
 
 const getRecipe = (name: string): Recipe => ({
   name,
-  ingredients: [],
+  quantifiedIngredients: [],
   source: "source",
   timeInMinutes: 1,
 })

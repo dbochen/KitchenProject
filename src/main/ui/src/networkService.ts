@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from "axios";
-import { Recipe } from "./recipes/model";
+import { Ingredient, Recipe } from "./recipes/model";
 
 export interface NetworkServiceProvider {
   getRecipes: () => Promise<Recipe[]>
-  getIngredients: (query: string, limit: number) => Promise<string[]>
+  getIngredients: (query: string, limit: number) => Promise<Ingredient[]>
 }
 
 export class NetworkService implements NetworkServiceProvider {
@@ -18,7 +18,7 @@ export class NetworkService implements NetworkServiceProvider {
     return (await this.axiosInstance.get("/recipes")).data
   }
 
-  public async getIngredients(query: string, limit: number): Promise<string[]> {
+  public async getIngredients(query: string, limit: number): Promise<Ingredient[]> {
     return (await this.axiosInstance.get(`/ingredients?search=${query}&limit=${limit}`)).data
   }
 

@@ -2,6 +2,7 @@ import './IngredientsList.scss'
 import { RecipesStrings } from "../strings";
 import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
 import { NetworkServiceProvider } from "../networkService";
+import { Ingredient } from "../recipes/model";
 
 type IngredientsListProps = {
   networkService: NetworkServiceProvider
@@ -9,9 +10,9 @@ type IngredientsListProps = {
 
 const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element => {
 
-  const [foundIngredients, setFoundIngredients] = useState<string[]>([]);
+  const [foundIngredients, setFoundIngredients] = useState<Ingredient[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [chosenIngredients, setChosenIngredients] = useState<Set<string>>(new Set());
+  const [chosenIngredients, setChosenIngredients] = useState<Set<Ingredient>>(new Set());
 
   const fetchIngredients = async (query: string): Promise<void> => {
     const response = await networkService.getIngredients(query, 5);
@@ -27,7 +28,7 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
     setSearchQuery(textContent)
   }
 
-  const onSearchResultIngredientClick = (ingredient: string): void => {
+  const onSearchResultIngredientClick = (ingredient: Ingredient): void => {
     const newIngredients = new Set(chosenIngredients)
     newIngredients.add(ingredient)
     setChosenIngredients(newIngredients)
@@ -39,14 +40,14 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
         <div
           className={"IngredientsList-searchResults--ingredient"}
           onClick={() => onSearchResultIngredientClick(ingredient)}
-          key={ingredient}
+          key={ingredient.id}
         >
-          {ingredient}
+          {ingredient.name}
         </div>
       )}
     </div>
 
-  const onRemoveIngredientClick = (ingredient: string): void => {
+  const onRemoveIngredientClick = (ingredient: Ingredient): void => {
     const newIngredients = new Set(chosenIngredients)
     newIngredients.delete(ingredient)
     setChosenIngredients(newIngredients)
@@ -54,10 +55,10 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
 
   const ingredientsList = chosenIngredients.size !== 0 &&
     <div className={"IngredientsList-ingredients"}>
-      {Array.from(chosenIngredients).map(ingredient =>
+      {Array.from(chosenIngredients).map((ingredient: Ingredient) =>
         <div className={"IngredientsList-ingredients--ingredient"}>
           <i className="gg-close-r" onClick={() => onRemoveIngredientClick(ingredient)}/>
-          <div>{ingredient}</div>
+          <div>{ingredient.name}</div>
         </div>
       )}
     </div>
