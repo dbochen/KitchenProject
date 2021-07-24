@@ -28,15 +28,14 @@ describe("RecipesList", () => {
 })
 
 const mockNetworkService = (recipes: Recipe[]): NetworkServiceProvider => ({
-    getRecipes: jest.fn().mockImplementation(() => ({
-      data: recipes
-    }))
+    getRecipes: jest.fn().mockImplementation(() => recipes),
+    getIngredients: jest.fn(),
   }
 )
 
 const getRecipe = (name: string): Recipe => ({
   name,
-  ingredients: [],
+  quantifiedIngredients: [],
   source: "source",
   timeInMinutes: 1,
 })

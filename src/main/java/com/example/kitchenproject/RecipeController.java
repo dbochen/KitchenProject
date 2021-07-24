@@ -31,7 +31,6 @@ public class RecipeController {
         return recipeRepository.getAllRecipes(sort);
     }
 
-    // todo: adjust to model changes, return List<Ingredient>
     @GetMapping("/ingredients")
     public List<Ingredient> getIngredients(
             @RequestParam(required = false, defaultValue = "") String search,

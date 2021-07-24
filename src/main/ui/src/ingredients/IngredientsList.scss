@@ -1,0 +1,84 @@
+.IngredientsList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #eeeded;
+  width: 300px;
+  margin-right: 100px;
+  padding: 50px;
+
+  &-header {
+    font-weight: 700;
+    font-size: 25px;
+    margin-bottom: 20px;
+  }
+
+  &-input {
+    margin-top: 10px;
+    width: 300px;
+    padding: 5px 12px 5px 30px;
+    font-size: 14px;
+    line-height: 12px;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    font-family: 'Montserrat', 'sans-serif';
+  }
+
+  .gg-search {
+    position: absolute;
+    top: 120px;
+    left: 40px;
+    display: block;
+    text-align: center;
+    pointer-events: none;
+    height: 14px;
+    width: 14px;
+    color: #b3b3b3;
+  }
+
+  &-searchResults {
+    padding: 8px;
+    min-width: 324px;
+    max-height: 270px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 6px;
+    margin-top: 5px;
+    border: 1px solid #e1e4e8;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    &--ingredient {
+      width: 100%;
+    }
+
+    &--ingredient:hover {
+      background-color: #F0D06B;
+      color: white;
+      font-weight: 500;
+    }
+  }
+
+  &-ingredients {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+
+    &--ingredient {
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      font-weight: 600;
+
+      .gg-close-r {
+        margin-right: 10px;
+        color: #D95A40;
+        cursor: pointer;
+      }
+    }
+  }
+}

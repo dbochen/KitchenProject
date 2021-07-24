@@ -19,7 +19,7 @@ const RecipesList = ({ networkService }: RecipesListProps): JSX.Element => {
 
   const fetchRecipes = async (): Promise<void> => {
     const recipesResponse = await networkService.getRecipes();
-    setRecipes(recipesResponse.data)
+    setRecipes(recipesResponse)
   }
 
   return (
