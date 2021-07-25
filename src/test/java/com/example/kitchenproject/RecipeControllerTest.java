@@ -24,7 +24,7 @@ class RecipeControllerTest {
         this.mockMvc.perform(get("/recipes"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)));
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
@@ -32,7 +32,7 @@ class RecipeControllerTest {
         this.mockMvc.perform(get("/ingredients"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(6)));
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
