@@ -1,5 +1,6 @@
 package com.example.kitchenproject.service;
 
+import com.example.kitchenproject.dto.RecipeDto;
 import com.example.kitchenproject.model.Ingredient;
 import com.example.kitchenproject.model.QuantifiedIngredient;
 import com.example.kitchenproject.model.Recipe;
@@ -54,4 +55,7 @@ public class RecipeService {
                 .collect(toList());
     }
 
+    public Recipe save(RecipeDto recipeDto) {
+        return recipeRepository.save(recipeDto.toRecipe());
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.kitchenproject.service;
 
+import com.example.kitchenproject.dto.IngredientDto;
 import com.example.kitchenproject.model.Ingredient;
 import com.example.kitchenproject.repository.IngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,19 +25,9 @@ public class IngredientService {
                .filter(ingredient -> ingredient.getName().startsWith(search))
                 .limit(limit)
                 .collect(toList());
-
-
-
-
-//        return RECIPES.stream()
-//                .map(Recipe::getQuantifiedIngredients)
-//                .flatMap(Collection::stream)
-//                .map(QuantifiedIngredient::getIngredient)
-//                .distinct()
-//                .filter(ingredient -> ingredient.getName().startsWith(search))
-//                .limit(limit)
-//                .collect(toList());
     }
 
-
+    public Ingredient save(IngredientDto ingredientDto) {
+       return ingredientRepository.save(Ingredient.builder().name(ingredientDto.getName()).build());
+    }
 }
