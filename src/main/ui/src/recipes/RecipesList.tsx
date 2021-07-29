@@ -1,27 +1,13 @@
-import { useEffect, useState } from "react";
-import { NetworkServiceProvider } from "../networkService";
 import { Recipe } from "./model";
 import RecipesListItem from "./RecipesListItem";
 import { RecipesStrings } from "../strings";
 import "./RecipesList.scss"
 
 type RecipesListProps = {
-  networkService: NetworkServiceProvider
+  recipes: Recipe[]
 }
 
-const RecipesList = ({ networkService }: RecipesListProps): JSX.Element => {
-
-  const [recipes, setRecipes] = useState<Recipe[]>([])
-
-  useEffect(() => {
-    fetchRecipes()
-  }, [])
-
-  const fetchRecipes = async (): Promise<void> => {
-    const recipesResponse = await networkService.getRecipes();
-    setRecipes(recipesResponse)
-  }
-
+const RecipesList = ({ recipes }: RecipesListProps): JSX.Element => {
   return (
     <div className={"RecipesList"}>
       <div className={"RecipesList-header"}>

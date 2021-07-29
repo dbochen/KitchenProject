@@ -1,21 +1,21 @@
 import './IngredientsList.scss'
 import { RecipesStrings } from "../strings";
 import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
-import { NetworkServiceProvider } from "../networkService";
+import { NetworkService } from "../NetworkService";
 import { Ingredient } from "../recipes/model";
 
 type IngredientsListProps = {
-  networkService: NetworkServiceProvider
+  onUpdateRecipesClick: (chosenIngredients: Set<Ingredient>) => void,
 }
 
-const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element => {
+const IngredientsList = ({ onUpdateRecipesClick }: IngredientsListProps): JSX.Element => {
 
   const [foundIngredients, setFoundIngredients] = useState<Ingredient[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [chosenIngredients, setChosenIngredients] = useState<Set<Ingredient>>(new Set());
 
   const fetchIngredients = async (query: string): Promise<void> => {
-    const response = await networkService.getIngredients(query, 5);
+    const response = await NetworkService.getIngredients(query, 5);
     setFoundIngredients(response)
   }
 
@@ -63,6 +63,11 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
       )}
     </div>
 
+  const updateRecipesButton =
+    <button onClick={() => onUpdateRecipesClick(chosenIngredients)}>
+      {RecipesStrings.INGREDIENTS_UPDATE_RECIPES}
+    </button>
+
   return (
     <div className={"IngredientsList"}>
       <div className={"IngredientsList-header"}>
@@ -76,6 +81,7 @@ const IngredientsList = ({ networkService }: IngredientsListProps): JSX.Element 
         onChange={onInputChange}
       />
       {searchResults}
+      {updateRecipesButton}
       {ingredientsList}
     </div>
   )
