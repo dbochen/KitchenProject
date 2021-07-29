@@ -64,7 +64,7 @@ const IngredientsList = ({ onUpdateRecipesClick }: IngredientsListProps): JSX.El
     </div>
 
   const updateRecipesButton =
-    <button onClick={() => onUpdateRecipesClick(chosenIngredients)}>
+    <button className={"IngredientsList-updateButton"} onClick={() => onUpdateRecipesClick(chosenIngredients)}>
       {RecipesStrings.INGREDIENTS_UPDATE_RECIPES}
     </button>
 
