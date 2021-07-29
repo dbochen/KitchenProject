@@ -1,5 +1,6 @@
 export const RecipesStrings = {
   RECIPES_LIST_HEADER: "PRZEPISY",
   INGREDIENTS_LIST_HEADER: "SKŁADNIKI",
-  INGREDIENTS_SEARCH_INPUT_PLACEHOLDER: "Szukaj składników"
+  INGREDIENTS_SEARCH_INPUT_PLACEHOLDER: "Szukaj składników",
+  INGREDIENTS_UPDATE_RECIPES: "Zaktualizuj przepisy"
 }

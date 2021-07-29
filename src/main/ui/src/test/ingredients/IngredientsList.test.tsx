@@ -1,15 +1,26 @@
 import { fireEvent, render } from "@testing-library/react";
 import IngredientsList from "../../ingredients/IngredientsList";
-import { Ingredient } from "../../recipes/model";
-import { NetworkServiceProvider } from "../../networkService";
+import { NetworkService } from "../../NetworkService";
+import { getIngredient } from "../App.test";
+
+jest.mock("../../NetworkService")
+
+const getIngredientsMock = NetworkService.getIngredients as jest.Mock
 
 describe("IngredientsList", () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   test("displays the list of ingredients returned by the service", async () => {
-    const networkService = mockNetworkService([
-      { name: "Ingredient 1", id: 1 },
-      { name: "Ingredient 2", id: 2 },
+    getIngredientsMock.mockReturnValue([
+      getIngredient("Ingredient 1"),
+      getIngredient("Ingredient 2"),
     ])
-    const { findByText, findByTestId } = render(<IngredientsList networkService={networkService}/>)
+    const { findByText, findByTestId } = render(
+      <IngredientsList onUpdateRecipesClick={jest.fn()}/>
+    )
     const input = await findByTestId("IngredientsList-input")
 
     fireEvent.change(input, { target: { value: "query" } })
@@ -18,9 +29,3 @@ describe("IngredientsList", () => {
     expect(await findByText("Ingredient 2")).toBeDefined()
   })
 })
-
-const mockNetworkService = (ingredients: Ingredient[]): NetworkServiceProvider => ({
-    getRecipes: jest.fn(),
-    getIngredients: jest.fn().mockImplementation(() => ingredients),
-  }
-)

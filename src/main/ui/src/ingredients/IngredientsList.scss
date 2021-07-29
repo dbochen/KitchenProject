@@ -81,4 +81,18 @@
       }
     }
   }
+
+  &-updateButton {
+    width: 100%;
+    margin-top: 5px;
+    background-color: #D95A40;
+    color: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #e23f1e;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 5px 16px;
+  }
 }
