@@ -1,1 +1,1 @@
-docker stop kitchen_postgres
+docker stop kitchen-postgres
