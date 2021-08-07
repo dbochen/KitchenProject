@@ -10,9 +10,16 @@ type IngredientsListProps = {
 
 const IngredientsList = ({ onUpdateRecipesClick }: IngredientsListProps): JSX.Element => {
 
+  const INGREDIENTS_STORAGE_KEY = "kitchenApp.chosenIngredients"
+
+  const getIngredientsFromStorage = (): Set<Ingredient> => {
+    const savedIngredients = localStorage.getItem(INGREDIENTS_STORAGE_KEY)
+    return savedIngredients ? new Set(JSON.parse(savedIngredients)) : new Set()
+  }
+
   const [foundIngredients, setFoundIngredients] = useState<Ingredient[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [chosenIngredients, setChosenIngredients] = useState<Set<Ingredient>>(new Set());
+  const [chosenIngredients, setChosenIngredients] = useState<Set<Ingredient>>(getIngredientsFromStorage());
 
   const fetchIngredients = async (query: string): Promise<void> => {
     const response = await NetworkService.getIngredients(query, 5);
@@ -22,6 +29,11 @@ const IngredientsList = ({ onUpdateRecipesClick }: IngredientsListProps): JSX.El
   useEffect(() => {
     fetchIngredients(searchQuery);
   }, [searchQuery]);
+
+  useEffect(() => {
+    const chosenIngredientsAsString = JSON.stringify(Array.from(chosenIngredients))
+    localStorage.setItem(INGREDIENTS_STORAGE_KEY, chosenIngredientsAsString)
+  }, [chosenIngredients])
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>): void => {
     const textContent = event.target.value
