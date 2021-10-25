@@ -1,25 +1,15 @@
 import { RecipesStrings } from "../strings";
-import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
+import { ChangeEvent, ChangeEventHandler, useState } from "react";
 import { NetworkService } from "../NetworkService";
 import { Ingredient, QuantifiedIngredient, QUANTITY_UNITS, QuantityUnit } from "./model";
 import { formatUnit } from "./formatUnit";
+import { IngredientsSearch } from "../ingredients/IngredientsSearch";
 
 const AddRecipe = (): JSX.Element => {
 
   const [recipeName, setRecipeName] = useState<string>("");
   const [source, setSource] = useState<string>("");
-  const [ingredientQuery, setIngredientQuery] = useState<string>("");
-  const [foundIngredients, setFoundIngredients] = useState<Ingredient[]>([]);
   const [chosenIngredients, setChosenIngredients] = useState<Record<number, QuantifiedIngredient>>({});
-
-  const fetchIngredients = async (query: string): Promise<void> => {
-    const response = await NetworkService.getIngredients(query, 5);
-    setFoundIngredients(response)
-  }
-
-  useEffect(() => {
-    fetchIngredients(ingredientQuery);
-  }, [ingredientQuery]);
 
   const onNameChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>): void =>
     onInputChange(event, setRecipeName)
@@ -27,38 +17,10 @@ const AddRecipe = (): JSX.Element => {
   const onSourceChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>): void =>
     onInputChange(event, setSource)
 
-  const onIngredientQueryChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>): void =>
-    onInputChange(event, setIngredientQuery)
-
   const onInputChange = (event: ChangeEvent<HTMLInputElement>, setValue: (x: string) => void): void => {
     const textContent = event.target.value
     setValue(textContent)
   }
-
-  const onSearchResultIngredientClick = (ingredient: Ingredient): void => {
-    setChosenIngredients({
-      ...chosenIngredients,
-      [ingredient.id]: {
-        ingredient,
-        quantity: 0,
-        unit: QUANTITY_UNITS[0]
-      }
-    })
-    setIngredientQuery("")
-  }
-
-  const searchResults = ingredientQuery !== "" &&
-    <div className={"IngredientsList-searchResults"}>
-      {foundIngredients.map(ingredient =>
-        <div
-          className={"IngredientsList-searchResults--ingredient"}
-          onClick={() => onSearchResultIngredientClick(ingredient)}
-          key={ingredient.id}
-        >
-          {ingredient.name}
-        </div>
-      )}
-    </div>
 
   const onRemoveIngredientClick = (ingredient: QuantifiedIngredient): void => {
     const newIngredients = { ...chosenIngredients }
@@ -116,7 +78,18 @@ const AddRecipe = (): JSX.Element => {
       setSource("")
       setChosenIngredients({})
     })
-    .catch(() => alert("Wywaliło się :("))
+      .catch(() => alert("Wywaliło się :("))
+  }
+
+  const onFoundIngredientClick = (ingredient: Ingredient) => {
+    setChosenIngredients({
+      ...chosenIngredients,
+      [ingredient.id]: {
+        ingredient,
+        quantity: 0,
+        unit: QUANTITY_UNITS[0]
+      }
+    })
   }
 
   return (
@@ -131,14 +104,7 @@ const AddRecipe = (): JSX.Element => {
         onChange={onNameChange}
         value={recipeName}
       />
-      <input
-        className={"AddRecipe-ingredientsInput"}
-        data-testid={"AddRecipe-ingredientsInput"}
-        placeholder={RecipesStrings.INGREDIENTS_SEARCH_INPUT_PLACEHOLDER}
-        onChange={onIngredientQueryChange}
-        value={ingredientQuery}
-      />
-      {searchResults}
+      <IngredientsSearch onIngredientClick={onFoundIngredientClick}/>
       {ingredientsList}
       <input
         className={"AddRecipe-sourceInput"}

@@ -56,15 +56,27 @@ const IngredientsList = ({
   const ingredientsList = ingredients.size !== 0 &&
     <div className={"IngredientsList-ingredients"}>
       {Array.from(ingredients).map((ingredient: Ingredient) =>
-        <div className={"IngredientsList-ingredients--ingredient"}>
-          <i className="gg-close-r" onClick={() => onRemoveIngredientClick(ingredient)}/>
+        <div
+          className={"IngredientsList-ingredients--ingredient"}
+          key={ingredient.id}
+          data-testid={`IngredientsList-ingredients--ingredient-${ingredient.name}`}
+        >
+          <i
+            className="gg-close-r"
+            onClick={() => onRemoveIngredientClick(ingredient)}
+            data-testid={`IngredientsList-ingredients--removeIngredient-${ingredient.name}`}
+          />
           <div>{ingredient.name}</div>
         </div>
       )}
     </div>
 
   const updateRecipesButton =
-    <button className={"IngredientsList-updateButton"} onClick={() => onUpdateRecipesClick(ingredients)}>
+    <button
+      className={"IngredientsList-updateButton"}
+      onClick={() => onUpdateRecipesClick(ingredients)}
+      data-testid={'IngredientsList-ingredients--updateRecipes'}
+    >
       {RecipesStrings.INGREDIENTS_UPDATE_RECIPES}
     </button>
 

@@ -22,11 +22,7 @@ const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesList
       .flatMap(recipe => recipe.quantifiedIngredients)
       .map(qi => qi.ingredient);
 
-    console.log(ingredientsWithDuplicates)
-
     const allIngredients: Ingredient[] = uniqBy(ingredientsWithDuplicates, (ingredient: Ingredient) => ingredient.name);
-
-    console.log(allIngredients)
 
     const ingredientsPropositions = allIngredients
       .filter(ingredient => !ingredientsNames.has(ingredient.name))
