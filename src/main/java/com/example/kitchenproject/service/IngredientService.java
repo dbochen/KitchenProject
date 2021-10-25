@@ -29,7 +29,7 @@ public class IngredientService {
     }
 
     private Predicate<Ingredient> matchesSearchPhrase(String search) {
-        return ingredient -> ingredient.getName().toLowerCase(Locale.ROOT).startsWith(search.toLowerCase(Locale.ROOT));
+        return ingredient -> ingredient.getName().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT));
     }
 
     public Ingredient save(IngredientDto ingredientDto) {

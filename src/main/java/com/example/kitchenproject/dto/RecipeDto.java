@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class RecipeDto {
-    @Size(min = 1, max = 25)
+    @Size(min = 1, max = 100)
     @NotNull
     private String name;
     @NotEmpty(message = "Recipe without ingredients?!")

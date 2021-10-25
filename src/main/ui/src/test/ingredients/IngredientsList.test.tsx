@@ -19,7 +19,12 @@ describe("IngredientsList", () => {
       getIngredient("Ingredient 2"),
     ])
     const { findByText, findByTestId } = render(
-      <IngredientsList onUpdateRecipesClick={jest.fn()}/>
+      <IngredientsList
+        onUpdateRecipesClick={jest.fn()}
+        ingredients={new Set()}
+        onAddIngredientClick={jest.fn()}
+        onRemoveIngredientClick={jest.fn()}
+      />
     )
     const input = await findByTestId("IngredientsList-input")
 
