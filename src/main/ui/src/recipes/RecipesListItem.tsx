@@ -44,7 +44,7 @@ const RecipesListItem = ({ recipe, ingredients }: RecipeListItemProps): JSX.Elem
         </div>
       </div>
       <div className={"RecipesListItem-ingredients"}>
-        {ingredientsString}
+        {`${ingredientsString} (${matchedIngredients.length}/${quantifiedIngredients.length})`}
       </div>
     </div>
   )
