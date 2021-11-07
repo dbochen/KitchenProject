@@ -16,9 +16,7 @@ export type Ingredient = {
   id: number,
 }
 
-export type QuantityUnit = "GRAM"
-  | "TEA_SPOON"
-  | "TABLE_SPOON"
-  | "CUP"
-  | "LITER"
-  | "MILLILITER"
+export const QUANTITY_UNITS =
+  ["PIECE", "GRAM", "TEA_SPOON", "TABLE_SPOON", "CUP", "LITER", "MILLILITER", "HANDFUL"] as const
+
+export type QuantityUnit = typeof QUANTITY_UNITS[number]

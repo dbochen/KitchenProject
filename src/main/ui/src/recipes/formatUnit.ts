@@ -24,8 +24,15 @@ export const formatUnit = (quantity: number, unit: QuantityUnit): string => {
     case "LITER": {
       return "l"
     }
-    case "MILLILITER":
+    case "MILLILITER": {
       return "ml"
+    }
+    case "PIECE": {
+      return getProperQuantityForm("sztuka", "sztuki", "sztuk")
+    }
+    case "HANDFUL": {
+      return getProperQuantityForm("garść", "garście", "garści")
+    }
   }
 }
 

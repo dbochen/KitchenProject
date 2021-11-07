@@ -19,6 +19,6 @@ public class QuantifiedIngredient {
     private int id;
     @ManyToOne
     private Ingredient ingredient;
-    private int quantity;
+    private double quantity;
     private QuantityUnit unit;
 }

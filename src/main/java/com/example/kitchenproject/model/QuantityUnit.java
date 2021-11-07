@@ -7,5 +7,6 @@ public enum QuantityUnit {
     TABLE_SPOON,
     CUP,
     LITER,
-    MILLILITER
+    MILLILITER,
+    HANDFUL
 }
