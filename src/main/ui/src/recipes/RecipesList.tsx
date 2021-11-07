@@ -40,10 +40,7 @@ const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesList
     <div className={"RecipesList"}>
       <div className={"IngredientsList-ingredients"}>
         {Array.from(propositions).map((ingredient: Ingredient) =>
-          <div
-            className={"IngredientsList-ingredients--ingredient"}
-            key={ingredient.id}
-            data-testid={`RecipesList-propositions--${ingredient.name}`}
+          <div className={"IngredientsList-ingredients--ingredient"} key={ingredient.id} data-testid={`RecipesList-propositions--${ingredient.name}`}
           >
             <i className="gg-add-r" onClick={() => onAddIngredientClick(ingredient)}/>
             <div>{ingredient.name}</div>
