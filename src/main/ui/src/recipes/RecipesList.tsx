@@ -14,6 +14,7 @@ type RecipesListProps = {
 const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesListProps): JSX.Element => {
 
   const [propositions, setPropositions] = useState<Ingredient[]>([])
+  const [rejectedPropositions, setRejectedPropositions] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const ingredientsNames = new Set(Array.from(ingredients).map(i => i.name))
@@ -25,11 +26,15 @@ const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesList
     const allIngredients: Ingredient[] = uniqBy(ingredientsWithDuplicates, (ingredient: Ingredient) => ingredient.name);
 
     const ingredientsPropositions = allIngredients
-      .filter(ingredient => !ingredientsNames.has(ingredient.name))
-      .slice(-10)
+      .filter(ingredient => !ingredientsNames.has(ingredient.name) && !rejectedPropositions.has(ingredient.name))
+      .slice(0,5)
 
     setPropositions(ingredientsPropositions)
-  }, [ingredients, recipes])
+  }, [ingredients, recipes, rejectedPropositions])
+
+  const onRemovePropositionClick = (ingredient: Ingredient) => {
+    setRejectedPropositions(new Set([...Array.from(rejectedPropositions), ingredient.name]))
+  }
 
   return (
     <div className={"RecipesList"}>
@@ -38,6 +43,7 @@ const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesList
           <div className={"IngredientsList-ingredients--ingredient"} key={ingredient.id}>
             <i className="gg-add-r" onClick={() => onAddIngredientClick(ingredient)}/>
             <div>{ingredient.name}</div>
+            <i className="gg-close-r" onClick={() => onRemovePropositionClick(ingredient)}/>
           </div>
         )}
       </div>
