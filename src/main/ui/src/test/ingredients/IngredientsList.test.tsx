@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import IngredientsList from "../../ingredients/IngredientsList";
 import { NetworkService } from "../../NetworkService";
-import { getIngredient } from "../App.test";
+import { getIngredient } from "../testUtils";
 
 jest.mock("../../NetworkService")
 

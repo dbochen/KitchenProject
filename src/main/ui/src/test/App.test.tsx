@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import App from "../App";
-import { Ingredient, Recipe } from "../recipes/model";
 import { NetworkService } from "../NetworkService";
+import { getIngredient, getRecipe } from "./testUtils";
 
 jest.mock("../NetworkService")
 
@@ -33,16 +33,4 @@ describe("App", () => {
     expect(getRecipesMock).toHaveBeenCalledWith("")
 
   })
-})
-
-export const getRecipe = (name: string): Recipe => ({
-  name,
-  quantifiedIngredients: [],
-  source: "source",
-  timeInMinutes: 1,
-})
-
-export const getIngredient = (name: string): Ingredient => ({
-  name,
-  id: Math.floor(Math.random() * 1000)
 })

@@ -10,9 +10,19 @@
 
   &-header {
     padding: 15px;
-    background: rgb(240, 208, 107);
-    background: linear-gradient(90deg, rgba(240, 208, 107, 1) 0%, rgba(217, 90, 64, 1) 100%);
     border-radius: 10px 10px 0 0;
+
+    &--complete {
+      background: linear-gradient(90deg, rgb(50, 173, 55) 0%, rgb(255, 229, 71) 100%);
+    }
+
+    &--partial {
+      background: linear-gradient(90deg, rgb(255, 219, 48) 0%, rgb(217, 130, 64) 100%);
+    }
+
+    &--missing {
+      background: linear-gradient(90deg, rgb(255, 141, 53) 0%, rgb(210, 35, 35) 100%);
+    }
 
     &--name {
       font-weight: 700;

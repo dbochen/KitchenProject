@@ -40,7 +40,7 @@ const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesList
     <div className={"RecipesList"}>
       <div className={"IngredientsList-ingredients"}>
         {Array.from(propositions).map((ingredient: Ingredient) =>
-          <div className={"IngredientsList-ingredients--ingredient"} key={ingredient.id}>
+          <div className={"IngredientsList-ingredients--ingredient"} key={ingredient.id} data-testid={`RecipesList-propositions--${ingredient.name}`}>
             <i className="gg-add-r" onClick={() => onAddIngredientClick(ingredient)}/>
             <div>{ingredient.name}</div>
             <i className="gg-close-r" onClick={() => onRemovePropositionClick(ingredient)}/>
@@ -50,7 +50,7 @@ const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesList
       <div className={"RecipesList-header"}>
         {RecipesStrings.RECIPES_LIST_HEADER}
       </div>
-      {recipes.map(recipe => <RecipesListItem recipe={recipe}/>)}
+      {recipes.map(recipe => <RecipesListItem recipe={recipe} ingredients={ingredients}/>)}
     </div>
   )
 }
