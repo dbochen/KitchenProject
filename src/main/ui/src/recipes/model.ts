@@ -3,6 +3,7 @@ export type Recipe = {
   quantifiedIngredients: QuantifiedIngredient[],
   source: string,
   timeInMinutes: number
+  id: number
 }
 
 export type QuantifiedIngredient = {

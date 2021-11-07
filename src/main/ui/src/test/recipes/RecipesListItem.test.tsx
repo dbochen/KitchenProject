@@ -5,6 +5,7 @@ import RecipesListItem from "../../recipes/RecipesListItem";
 describe("RecipesListItem", () => {
   test("renders properly", async () => {
     const recipe: Recipe = {
+      id: 1,
       name: "Recipe",
       source: "Source",
       timeInMinutes: 10,
@@ -35,7 +36,7 @@ describe("RecipesListItem", () => {
         }
       ]
     };
-    const { findByText } = render(<RecipesListItem recipe={recipe}/>)
+    const { findByText } = render(<RecipesListItem recipe={recipe} ingredients={new Set()}/>)
 
     expect(await findByText("RECIPE")).toBeDefined()
     expect(await findByText("Source")).toBeDefined()
