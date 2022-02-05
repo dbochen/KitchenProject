@@ -54,6 +54,15 @@ const App = (): JSX.Element => {
     setChosenIngredients(new Set())
   }
 
+  const onRemoveRecipeClick = (recipe: Recipe) => {
+    NetworkService.deleteRecipe(recipe)
+      .then(() => {
+        const newRecipes = recipes.filter(r => r.id !== recipe.id);
+        setRecipes(newRecipes)
+      })
+      .catch(() => alert("Wywaliło się :("))
+  }
+
   return (
     <div className="App">
       <IngredientsList
@@ -63,7 +72,12 @@ const App = (): JSX.Element => {
         onRemoveIngredientClick={onRemoveIngredientClick}
         onIngredientsClearClick={onIngredientsClearClick}
       />
-      <RecipesList recipes={recipes} ingredients={chosenIngredients} onAddIngredientClick={onAddIngredientClick}/>
+      <RecipesList
+        recipes={recipes}
+        ingredients={chosenIngredients}
+        onAddIngredientClick={onAddIngredientClick}
+        onRemoveRecipeClick={onRemoveRecipeClick}
+      />
       <div>
         <AddRecipe/>
         <AddTag/>
