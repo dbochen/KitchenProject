@@ -6,22 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @Builder
 @Entity
 @NoArgsConstructor
-public class Recipe {
+public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Column(unique = true)
     private String name;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<QuantifiedIngredient> quantifiedIngredients;
-    private String source;
-    private int timeInMinutes;
-    @OneToMany
-    private List<Tag> tags;
 }

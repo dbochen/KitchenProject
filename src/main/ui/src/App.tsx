@@ -49,10 +49,19 @@ const App = (): JSX.Element => {
     setChosenIngredients(newIngredients)
   }
 
+  const onIngredientsClearClick = (): void => {
+    setChosenIngredients(new Set())
+  }
+
   return (
     <div className="App">
-      <IngredientsList ingredients={chosenIngredients} onUpdateRecipesClick={onUpdateRecipesClick}
-                       onAddIngredientClick={onAddIngredientClick} onRemoveIngredientClick={onRemoveIngredientClick}/>
+      <IngredientsList
+        ingredients={chosenIngredients}
+        onUpdateRecipesClick={onUpdateRecipesClick}
+        onAddIngredientClick={onAddIngredientClick}
+        onRemoveIngredientClick={onRemoveIngredientClick}
+        onIngredientsClearClick={onIngredientsClearClick}
+      />
       <RecipesList recipes={recipes} ingredients={chosenIngredients} onAddIngredientClick={onAddIngredientClick}/>
       <AddRecipe/>
     </div>
