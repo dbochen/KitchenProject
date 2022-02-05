@@ -7,5 +7,7 @@ export const RecipesStrings = {
   ADD_RECIPE_HEADER: "Dodaj przepis",
   ADD_RECIPE_NAME_INPUT_PLACEHOLDER: "Nazwa przepisu",
   ADD_RECIPE_SOURCE_INPUT_PLACEHOLDER: "Zródło przepisu",
-  ADD_RECIPE_SAVE: "Zapisz przepis"
+  ADD_TAG_INPUT_PLACEHOLDER: "Tag",
+  ADD_RECIPE_SAVE: "Zapisz przepis",
+  ADD_TAGE_SAVE: "Zapisz tag"
 }

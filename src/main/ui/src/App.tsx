@@ -5,6 +5,7 @@ import IngredientsList from "./ingredients/IngredientsList";
 import { Ingredient, Recipe } from "./recipes/model";
 import { NetworkService } from "./NetworkService";
 import AddRecipe from "./recipes/AddRecipe";
+import { AddTag } from "./tags/AddTag";
 
 const App = (): JSX.Element => {
 
@@ -63,7 +64,10 @@ const App = (): JSX.Element => {
         onIngredientsClearClick={onIngredientsClearClick}
       />
       <RecipesList recipes={recipes} ingredients={chosenIngredients} onAddIngredientClick={onAddIngredientClick}/>
-      <AddRecipe/>
+      <div>
+        <AddRecipe/>
+        <AddTag/>
+      </div>
     </div>
   )
 }
