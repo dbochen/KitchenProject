@@ -58,4 +58,8 @@ public class RecipeService {
     public Recipe save(RecipeDto recipeDto) {
         return recipeRepository.save(recipeDto.toRecipe());
     }
+
+    public void removeRecipe(Integer id) {
+        recipeRepository.deleteById(id);
+    }
 }

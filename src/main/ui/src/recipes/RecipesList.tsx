@@ -9,9 +9,15 @@ type RecipesListProps = {
   recipes: Recipe[]
   ingredients: Set<Ingredient>
   onAddIngredientClick: (ingredient: Ingredient) => void
+  onRemoveRecipeClick: (recipe: Recipe) => void
 }
 
-const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesListProps): JSX.Element => {
+const RecipesList = ({
+                       recipes,
+                       ingredients,
+                       onAddIngredientClick,
+                       onRemoveRecipeClick
+                     }: RecipesListProps): JSX.Element => {
 
   const [propositions, setPropositions] = useState<Ingredient[]>([])
   const [rejectedPropositions, setRejectedPropositions] = useState<Set<string>>(new Set())
@@ -27,7 +33,7 @@ const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesList
 
     const ingredientsPropositions = allIngredients
       .filter(ingredient => !ingredientsNames.has(ingredient.name) && !rejectedPropositions.has(ingredient.name))
-      .slice(0,5)
+      .slice(0, 5)
 
     setPropositions(ingredientsPropositions)
   }, [ingredients, recipes, rejectedPropositions])
@@ -54,7 +60,12 @@ const RecipesList = ({ recipes, ingredients, onAddIngredientClick }: RecipesList
       <div className={"RecipesList-header"}>
         {RecipesStrings.RECIPES_LIST_HEADER}
       </div>
-      {recipes.map(recipe => <RecipesListItem recipe={recipe} ingredients={ingredients}/>)}
+      {recipes.map(recipe => <RecipesListItem
+          recipe={recipe}
+          ingredients={ingredients}
+          onRemoveRecipeClick={() => onRemoveRecipeClick(recipe)}
+        />
+      )}
     </div>
   )
 }

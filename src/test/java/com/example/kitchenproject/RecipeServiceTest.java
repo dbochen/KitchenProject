@@ -14,33 +14,41 @@ import org.mockito.Mockito;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.util.List.of;
+
 public class RecipeServiceTest {
     private static final List<Recipe> RECIPES = Arrays.asList(
-            new Recipe(1,
+            new Recipe(
+                    1,
                     "parówki",
-                    List.of(new QuantifiedIngredient(1, new Ingredient(1, "parówka"), 4, QuantityUnit.GRAM)),
+                    of(new QuantifiedIngredient(1, new Ingredient(1, "parówka"), 4, QuantityUnit.GRAM)),
                     "domowy",
-                    10
+                    10,
+                    of()
             ),
-            new Recipe(2,
+            new Recipe(
+                    2,
                     "tosty",
-                    List.of(
+                    of(
                             new QuantifiedIngredient(2, new Ingredient(2, "chleb tostowy"), 2, QuantityUnit.CUP),
                             new QuantifiedIngredient(3, new Ingredient(3, "szynka"), 1, QuantityUnit.LITER),
                             new QuantifiedIngredient(4, new Ingredient(4, "ser"), 1, QuantityUnit.TEA_SPOON)
                     ),
                     "domowy",
-                    5
+                    5,
+                    of()
             ),
-            new Recipe(3,
+            new Recipe(
+                    3,
                     "chrupki z mlekiem",
-                    List.of(
+                    of(
                             new QuantifiedIngredient(5, new Ingredient(100, "chrupki"), 100, QuantityUnit.GRAM),
                             new QuantifiedIngredient(6, new Ingredient(300, "mleko"), 300, QuantityUnit.MILLILITER),
                             new QuantifiedIngredient(7, new Ingredient(1, "parówka"), 8, QuantityUnit.GRAM)
                     ),
                     "starożytny",
-                    15
+                    15,
+                    of()
             )
     );
 

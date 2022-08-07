@@ -6,9 +6,10 @@ import classNames from 'classnames';
 type RecipeListItemProps = {
   recipe: Recipe
   ingredients: Set<Ingredient>
+  onRemoveRecipeClick: () => void
 }
 
-const RecipesListItem = ({ recipe, ingredients }: RecipeListItemProps): JSX.Element => {
+const RecipesListItem = ({ recipe, ingredients, onRemoveRecipeClick }: RecipeListItemProps): JSX.Element => {
 
   const { name, id, quantifiedIngredients, source } = recipe;
 
@@ -33,6 +34,12 @@ const RecipesListItem = ({ recipe, ingredients }: RecipeListItemProps): JSX.Elem
     { "RecipesListItem-header--missing": ingredientsCompleteness < 0.5 }
   )
 
+  const onRemoveClick = () => {
+    if (confirm(`Na pewno chcesz usunąć przepis ${name}?`)) {
+      onRemoveRecipeClick()
+    }
+  }
+
   return (
     <div className={"RecipesListItem"} key={id}>
       <div className={headerClassNames}>
@@ -42,6 +49,7 @@ const RecipesListItem = ({ recipe, ingredients }: RecipeListItemProps): JSX.Elem
         <div className={"RecipesListItem-header--source"}>
           {source}
         </div>
+        <i className="gg-close-r" onClick={onRemoveClick}/>
       </div>
       <div className={"RecipesListItem-ingredients"}>
         {`${ingredientsString} (${matchedIngredients.length}/${quantifiedIngredients.length})`}

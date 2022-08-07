@@ -1,57 +1,28 @@
 import './IngredientsList.scss'
 import { RecipesStrings } from "../strings";
-import { ChangeEvent, ChangeEventHandler, useEffect, useState } from "react";
 import { NetworkService } from "../NetworkService";
 import { Ingredient } from "../recipes/model";
+import { Search } from "../Search";
 
 type IngredientsListProps = {
   onUpdateRecipesClick: (chosenIngredients: Set<Ingredient>) => void
   onAddIngredientClick: (ingredient: Ingredient) => void
   onRemoveIngredientClick: (ingredient: Ingredient) => void
   ingredients: Set<Ingredient>
+  onIngredientsClearClick: () => void
 }
 
 const IngredientsList = ({
                            onUpdateRecipesClick,
                            onAddIngredientClick,
                            onRemoveIngredientClick,
-                           ingredients
+                           ingredients,
+                           onIngredientsClearClick
                          }: IngredientsListProps): JSX.Element => {
-
-  const [foundIngredients, setFoundIngredients] = useState<Ingredient[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
-  const fetchIngredients = async (query: string): Promise<void> => {
-    const response = await NetworkService.getIngredients(query, 5);
-    setFoundIngredients(response)
-  }
-
-  useEffect(() => {
-    fetchIngredients(searchQuery);
-  }, [searchQuery]);
-
-  const onInputChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>): void => {
-    const textContent = event.target.value
-    setSearchQuery(textContent)
-  }
 
   const onSearchResultIngredientClick = (ingredient: Ingredient): void => {
     onAddIngredientClick(ingredient)
   }
-
-  const searchResults = searchQuery !== "" &&
-    <div className={"IngredientsList-searchResults"}>
-      {foundIngredients.map(ingredient =>
-        <div
-          className={"IngredientsList-searchResults--ingredient"}
-          onClick={() => onSearchResultIngredientClick(ingredient)}
-          key={ingredient.id}
-          data-testid={`IngredientsList-searchResults--ingredient-${ingredient.name}`}
-        >
-          {ingredient.name}
-        </div>
-      )}
-    </div>
 
   const ingredientsList = ingredients.size !== 0 &&
     <div className={"IngredientsList-ingredients"}>
@@ -80,20 +51,28 @@ const IngredientsList = ({
       {RecipesStrings.INGREDIENTS_UPDATE_RECIPES}
     </button>
 
+  const clearIngredientsButton =
+    <button
+      className={"IngredientsList-updateButton"}
+      onClick={onIngredientsClearClick}
+      data-testid={'IngredientsList-ingredients--updateRecipes'}
+    >
+      {RecipesStrings.INGREDIENTS_CLEAR}
+    </button>
+
+
   return (
     <div className={"IngredientsList"}>
       <div className={"IngredientsList-header"}>
         {RecipesStrings.INGREDIENTS_LIST_HEADER}
       </div>
-      <i className="gg-search"/>
-      <input
-        className={"IngredientsList-input"}
-        data-testid={"IngredientsList-input"}
-        placeholder={RecipesStrings.INGREDIENTS_SEARCH_INPUT_PLACEHOLDER}
-        onChange={onInputChange}
+      <Search
+        onItemClick={onSearchResultIngredientClick}
+        getItems={NetworkService.getIngredients}
+        inputPlaceholder={RecipesStrings.INGREDIENTS_SEARCH_INPUT_PLACEHOLDER}
       />
-      {searchResults}
       {updateRecipesButton}
+      {clearIngredientsButton}
       {ingredientsList}
     </div>
   )

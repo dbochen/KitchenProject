@@ -3,7 +3,7 @@ import { ChangeEvent, ChangeEventHandler, useState } from "react";
 import { NetworkService } from "../NetworkService";
 import { Ingredient, QuantifiedIngredient, QUANTITY_UNITS, QuantityUnit } from "./model";
 import { formatUnit } from "./formatUnit";
-import { IngredientsSearch } from "../ingredients/IngredientsSearch";
+import { Search } from "../Search";
 
 const AddRecipe = (): JSX.Element => {
 
@@ -104,7 +104,11 @@ const AddRecipe = (): JSX.Element => {
         onChange={onNameChange}
         value={recipeName}
       />
-      <IngredientsSearch onIngredientClick={onFoundIngredientClick}/>
+      <Search
+        onItemClick={onFoundIngredientClick}
+        getItems={NetworkService.getIngredients}
+        inputPlaceholder={RecipesStrings.INGREDIENTS_SEARCH_INPUT_PLACEHOLDER}
+      />
       {ingredientsList}
       <input
         className={"AddRecipe-sourceInput"}

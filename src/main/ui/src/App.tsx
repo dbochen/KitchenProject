@@ -5,6 +5,7 @@ import IngredientsList from "./ingredients/IngredientsList";
 import { Ingredient, Recipe } from "./recipes/model";
 import { NetworkService } from "./NetworkService";
 import AddRecipe from "./recipes/AddRecipe";
+import { AddTag } from "./tags/AddTag";
 
 const App = (): JSX.Element => {
 
@@ -49,12 +50,38 @@ const App = (): JSX.Element => {
     setChosenIngredients(newIngredients)
   }
 
+  const onIngredientsClearClick = (): void => {
+    setChosenIngredients(new Set())
+  }
+
+  const onRemoveRecipeClick = (recipe: Recipe) => {
+    NetworkService.deleteRecipe(recipe)
+      .then(() => {
+        const newRecipes = recipes.filter(r => r.id !== recipe.id);
+        setRecipes(newRecipes)
+      })
+      .catch(() => alert("Wywaliło się :("))
+  }
+
   return (
     <div className="App">
-      <IngredientsList ingredients={chosenIngredients} onUpdateRecipesClick={onUpdateRecipesClick}
-                       onAddIngredientClick={onAddIngredientClick} onRemoveIngredientClick={onRemoveIngredientClick}/>
-      <RecipesList recipes={recipes} ingredients={chosenIngredients} onAddIngredientClick={onAddIngredientClick}/>
-      <AddRecipe/>
+      <IngredientsList
+        ingredients={chosenIngredients}
+        onUpdateRecipesClick={onUpdateRecipesClick}
+        onAddIngredientClick={onAddIngredientClick}
+        onRemoveIngredientClick={onRemoveIngredientClick}
+        onIngredientsClearClick={onIngredientsClearClick}
+      />
+      <RecipesList
+        recipes={recipes}
+        ingredients={chosenIngredients}
+        onAddIngredientClick={onAddIngredientClick}
+        onRemoveRecipeClick={onRemoveRecipeClick}
+      />
+      <div>
+        <AddRecipe/>
+        <AddTag/>
+      </div>
     </div>
   )
 }
