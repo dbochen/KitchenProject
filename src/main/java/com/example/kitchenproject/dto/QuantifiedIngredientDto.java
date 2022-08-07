@@ -3,12 +3,13 @@ package com.example.kitchenproject.dto;
 import com.example.kitchenproject.model.Ingredient;
 import com.example.kitchenproject.model.QuantifiedIngredient;
 import com.example.kitchenproject.model.QuantityUnit;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @Data
+@Builder
 public class QuantifiedIngredientDto {
     @NotNull
     private int id;
