@@ -1,6 +1,7 @@
 package com.example.kitchenproject.controller;
 
-import com.example.kitchenproject.dto.RecipeDto;
+import com.example.kitchenproject.dto.RecipeInputDto;
+import com.example.kitchenproject.dto.RecipeOutputDto;
 import com.example.kitchenproject.model.Recipe;
 import com.example.kitchenproject.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.websocket.server.PathParam;
 import java.util.List;
 
 import static com.example.kitchenproject.config.Config.UI_ORIGIN;
@@ -25,17 +25,30 @@ public class RecipeController {
     }
 
     @GetMapping("/recipes")
-    public List<Recipe> getRecipes(@RequestParam(required = false, defaultValue = "") String sort) {
-        return recipeService.getAllRecipes(sort);
+    public List<Recipe> getRecipes(
+            @RequestParam(required = false, defaultValue = "") String sort,
+            @RequestParam(required = false, defaultValue = "") String tags
+    ) {
+        return recipeService.getAllRecipes(sort, tags);
     }
 
     @PostMapping("/recipes")
-    public Recipe addRecipe (@Valid @RequestBody RecipeDto recipeDto){
+    public Recipe addRecipe (@Valid @RequestBody RecipeInputDto recipeDto){
         return recipeService.save(recipeDto);
     }
 
     @DeleteMapping("/recipes/{id}")
     public void removeRecipe(@PathVariable Integer id) {
         recipeService.removeRecipe(id);
+    }
+
+    @GetMapping("/recipes/{id}")
+    public RecipeOutputDto getRecipe(@PathVariable Integer id) {
+        return recipeService.getRecipe(id);
+    }
+
+    @PutMapping("/recipes/{id}")
+    public void addTags(@PathVariable Integer id, @RequestBody List<Integer> tagIds) {
+        recipeService.addTagsToRecipe(id, tagIds);
     }
 }

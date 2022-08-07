@@ -1,5 +1,6 @@
 package com.example.kitchenproject.model;
 
+import com.example.kitchenproject.dto.QuantifiedIngredientDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,6 +1,7 @@
 package com.example.kitchenproject.dto;
 
 import com.example.kitchenproject.model.Recipe;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
@@ -10,14 +11,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class RecipeDto {
+@Builder
+public class RecipeInputDto {
     @Size(min = 1, max = 100)
     @NotNull
     private String name;
     @NotEmpty(message = "Recipe without ingredients?!")
     private List<QuantifiedIngredientDto> ingredients;
     private String source;
-
 
     public Recipe toRecipe() {
         return Recipe.builder()
@@ -29,6 +30,4 @@ public class RecipeDto {
                 .build();
 
     }
-
-
 }

@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.List.of;
 
@@ -24,7 +25,7 @@ public class RecipeServiceTest {
                     of(new QuantifiedIngredient(1, new Ingredient(1, "parówka"), 4, QuantityUnit.GRAM)),
                     "domowy",
                     10,
-                    of()
+                    Set.of()
             ),
             new Recipe(
                     2,
@@ -36,7 +37,7 @@ public class RecipeServiceTest {
                     ),
                     "domowy",
                     5,
-                    of()
+                    Set.of()
             ),
             new Recipe(
                     3,
@@ -48,7 +49,7 @@ public class RecipeServiceTest {
                     ),
                     "starożytny",
                     15,
-                    of()
+                    Set.of()
             )
     );
 
@@ -60,7 +61,7 @@ public class RecipeServiceTest {
 
         Mockito.when(repository.findAll()).thenReturn(RECIPES);
 
-        List<Recipe> result = recipeService.getAllRecipes("1");
+        List<Recipe> result = recipeService.getAllRecipes("1", "");
 
         Assertions.assertEquals("parówki", result.get(0).getName());
         Assertions.assertEquals("chrupki z mlekiem", result.get(1).getName());
@@ -74,7 +75,7 @@ public class RecipeServiceTest {
 
         Mockito.when(repository.findAll()).thenReturn(RECIPES);
 
-        List<Recipe> result = recipeService.getAllRecipes("1,3");
+        List<Recipe> result = recipeService.getAllRecipes("1,3", "");
 
         Assertions.assertEquals("parówki", result.get(0).getName());
         Assertions.assertEquals("tosty", result.get(1).getName());
