@@ -26,7 +26,8 @@ public class QuantifiedIngredient {
     public QuantifiedIngredientOutputDto toOutputDto() {
         return QuantifiedIngredientOutputDto.builder()
                 .unit(unit)
-                .ingredient(ingredient.toOutputDto(unit))
+                .ingredient(ingredient.toOutputDto())
+                .quantity(quantity)
                 .build();
     }
 }

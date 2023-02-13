@@ -26,17 +26,10 @@ public class Ingredient {
     @JoinColumn(name = "ingredient_id")
     private List<Serving> servings;
 
-    public IngredientOutputDto toOutputDto(QuantityUnit unit) {
+    public IngredientOutputDto toOutputDto() {
         return IngredientOutputDto.builder()
-                .serving(servings
-                        .stream()
-                        .filter(serving -> serving.getUnit().equals(unit))
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException(
-                                String.format("Cannot find serving size for the " +
-                                        "ingredient %d with category %s and unit %s", id, category, unit)))
-                        .getCategoryServing()
-                )
+                .id(id)
+                .name(name)
                 .build();
     }
 }
