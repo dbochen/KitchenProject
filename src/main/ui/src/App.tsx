@@ -63,6 +63,11 @@ const App = (): JSX.Element => {
       .catch(() => alert("Wywaliło się :("))
   }
 
+  const onHideRecipeClick = (recipe: Recipe) => {
+    const newRecipes = recipes.filter(r => r.id !== recipe.id);
+    setRecipes(newRecipes)
+  }
+
   return (
     <div className="App">
       <IngredientsList
@@ -77,6 +82,7 @@ const App = (): JSX.Element => {
         ingredients={chosenIngredients}
         onAddIngredientClick={onAddIngredientClick}
         onRemoveRecipeClick={onRemoveRecipeClick}
+        onHideRecipeClick={onHideRecipeClick}
       />
       <div>
         <AddRecipe/>

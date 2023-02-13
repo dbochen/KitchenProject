@@ -7,9 +7,15 @@ type RecipeListItemProps = {
   recipe: Recipe
   ingredients: Set<Ingredient>
   onRemoveRecipeClick: () => void
+  onHideClick: () => void
 }
 
-const RecipesListItem = ({ recipe, ingredients, onRemoveRecipeClick }: RecipeListItemProps): JSX.Element => {
+const RecipesListItem = ({
+                           recipe,
+                           ingredients,
+                           onRemoveRecipeClick,
+                           onHideClick
+                         }: RecipeListItemProps): JSX.Element => {
 
   const { name, id, quantifiedIngredients, source } = recipe;
 
@@ -50,6 +56,7 @@ const RecipesListItem = ({ recipe, ingredients, onRemoveRecipeClick }: RecipeLis
           {source}
         </div>
         <i className="gg-close-r" onClick={onRemoveClick}/>
+        <i className="gg-arrow-right-o" onClick={onHideClick}/>
       </div>
       <div className={"RecipesListItem-ingredients"}>
         {`${ingredientsString} (${matchedIngredients.length}/${quantifiedIngredients.length})`}

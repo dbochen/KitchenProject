@@ -25,7 +25,7 @@ public class RecipeController {
     }
 
     @GetMapping("/recipes")
-    public List<Recipe> getRecipes(
+    public List<RecipeOutputDto> getRecipes(
             @RequestParam(required = false, defaultValue = "") String sort,
             @RequestParam(required = false, defaultValue = "") String tags
     ) {

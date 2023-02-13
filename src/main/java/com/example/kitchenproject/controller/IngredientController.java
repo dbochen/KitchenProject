@@ -1,6 +1,6 @@
 package com.example.kitchenproject.controller;
 
-import com.example.kitchenproject.dto.IngredientDto;
+import com.example.kitchenproject.dto.IngredientInputDto;
 import com.example.kitchenproject.model.Ingredient;
 import com.example.kitchenproject.service.IngredientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class IngredientController {
     }
 
     @PostMapping("/ingredients")
-    public Ingredient addIngredient(@Valid @RequestBody IngredientDto ingredientDto){
+    public Ingredient addIngredient(@Valid @RequestBody IngredientInputDto ingredientDto){
         return ingredientService.save(ingredientDto);
 
     }
