@@ -10,13 +10,15 @@ type RecipesListProps = {
   ingredients: Set<Ingredient>
   onAddIngredientClick: (ingredient: Ingredient) => void
   onRemoveRecipeClick: (recipe: Recipe) => void
+  onHideRecipeClick: (recipe: Recipe) => void
 }
 
 const RecipesList = ({
                        recipes,
                        ingredients,
                        onAddIngredientClick,
-                       onRemoveRecipeClick
+                       onRemoveRecipeClick,
+                       onHideRecipeClick,
                      }: RecipesListProps): JSX.Element => {
 
   const [propositions, setPropositions] = useState<Ingredient[]>([])
@@ -64,6 +66,7 @@ const RecipesList = ({
           recipe={recipe}
           ingredients={ingredients}
           onRemoveRecipeClick={() => onRemoveRecipeClick(recipe)}
+          onHideClick={() => onHideRecipeClick(recipe)}
         />
       )}
     </div>

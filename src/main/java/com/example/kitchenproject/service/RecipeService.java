@@ -24,7 +24,7 @@ public class RecipeService {
         this.recipeRepository = recipeRepository;
     }
 
-    public List<Recipe> getAllRecipes(String sort, String tagsString) {
+    public List<RecipeOutputDto> getAllRecipes(String sort, String tagsString) {
         List<Integer> ids = Arrays.stream(sort.split(","))
                 .filter(id -> !id.equals(""))
                 .map(Integer::parseInt)
@@ -41,6 +41,9 @@ public class RecipeService {
                 .findAll()
                 .stream()
                 .filter(recipe -> {
+                    if (tagIds.isEmpty()) {
+                        return true;
+                    }
                     final Set<Integer> recipeTags = recipe.getTags().stream().map(Tag::getId).collect(toSet());
                     recipeTags.retainAll(tagIds);
                     return !recipeTags.isEmpty();
@@ -70,6 +73,7 @@ public class RecipeService {
         return entries.stream()
                 .sorted(Comparator.comparingDouble(entry -> -entry.getValue()))
                 .map(Map.Entry::getKey)
+                .map(Recipe::toRecipeOutputDto)
                 .collect(toList());
     }
 

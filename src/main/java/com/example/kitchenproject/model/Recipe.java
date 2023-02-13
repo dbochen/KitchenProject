@@ -33,6 +33,12 @@ public class Recipe {
         return RecipeOutputDto.builder()
                 .name(name)
                 .tags(tags.stream().map(Tag::getName).collect(toList()))
+                .id(id)
+                .quantifiedIngredients(quantifiedIngredients
+                        .stream()
+                        .map(QuantifiedIngredient::toOutputDto)
+                        .collect(toList())
+                )
                 .build();
     }
 }
