@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 @Data
@@ -25,11 +25,17 @@ public class Ingredient {
     @OneToMany
     @JoinColumn(name = "ingredient_id")
     private List<Serving> servings;
+    @Column
+    private Balance vataBalance;
+    @Column
+    private Inflammation inflammation;
 
     public IngredientOutputDto toOutputDto() {
         return IngredientOutputDto.builder()
                 .id(id)
                 .name(name)
+                .vataBalance(vataBalance)
+                .inflammation(inflammation)
                 .build();
     }
 }

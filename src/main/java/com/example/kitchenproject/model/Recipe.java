@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +43,35 @@ public class Recipe {
                         .collect(toList())
                 )
                 .categoryServings(getCategoryServings())
+                .source(source)
+                .balanceSum(quantifiedIngredients
+                        .stream()
+                        .reduce(
+                                0,
+                                (acc, qi) -> {
+                                    final Balance vataBalance = qi.getIngredient().getVataBalance();
+                                    if (vataBalance == null) {
+                                        return acc;
+                                    }
+                                    return acc + vataBalance.getValue();
+                                },
+                                Integer::sum
+                        )
+                )
+                .inflammationSum(quantifiedIngredients
+                        .stream()
+                        .reduce(
+                                0,
+                                (acc, qi) -> {
+                                    final Inflammation inflammation = qi.getIngredient().getInflammation();
+                                    if (inflammation == null) {
+                                        return acc;
+                                    }
+                                    return acc + inflammation.ordinal() - 1;
+                                },
+                                Integer::sum
+                        )
+                )
                 .build();
     }
 
@@ -61,14 +90,15 @@ public class Recipe {
             final Ingredient ingredient = qi.getIngredient();
             final List<Serving> servings = ingredient.getServings();
             final QuantityUnit unit = qi.getUnit();
-            return servings.isEmpty() ? 0 : servings
+            return ingredient.getCategory() == null ? 0 : servings
                     .stream()
                     .filter(serving -> serving.getUnit().equals(unit))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException(
                             String.format("Cannot find serving size for the " +
-                                            "ingredient %d with category %s and unit %s",
-                                    id, ingredient.getCategory(), unit
+                                            "ingredient %d (%s) with category %s and unit %s (%d)",
+                                    ingredient.getId(), ingredient.getName(), ingredient.getCategory(), unit,
+                                    unit.ordinal()
                             )))
                     .getCategoryServing() * qi.getQuantity();
         };

@@ -16,4 +16,6 @@ public class RecipeOutputDto {
     private String source;
     private List<String> tags;
     private Map<Category, Double> categoryServings;
+    private int balanceSum;
+    private int inflammationSum;
 }

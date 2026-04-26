@@ -3,7 +3,10 @@ export type Recipe = {
   quantifiedIngredients: QuantifiedIngredient[],
   source: string,
   timeInMinutes: number
-  id: number
+  id: number,
+  categoryServings: Record<string, number>,
+  balanceSum: number,
+  inflammationSum: number,
 }
 
 export type QuantifiedIngredient = {
@@ -15,9 +18,22 @@ export type QuantifiedIngredient = {
 export type Ingredient = {
   name: string,
   id: number,
+  vataBalance: "VERY_BALANCING" | "BALANCING" | "AGGRAVATING" | "VERY_AGGRAVATING",
 }
 
 export const QUANTITY_UNITS =
   ["PIECE", "GRAM", "TEA_SPOON", "TABLE_SPOON", "CUP", "LITER", "MILLILITER", "HANDFUL"] as const
 
 export type QuantityUnit = typeof QUANTITY_UNITS[number]
+
+export const categoryToDailyServings: Record<string, number> = {
+  "NUTS_AND_SEEDS": 1,
+  "OTHER_VEGETABLES": 2,
+  "GREENS": 2,
+  "BEANS": 3,
+  "OTHER_FRUITS": 3,
+  "WHOLE_GRAINS": 3,
+  "BERRIES": 1,
+  "CRUCIFEROUS_VEGETABLES": 1,
+  "FLAXSEED": 1,
+}

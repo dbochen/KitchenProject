@@ -8,6 +8,10 @@
   margin-bottom: 10px;
   margin-top: 10px;
 
+  &--selected {
+    border: solid 10px #e1e4e8;
+  }
+
   &-header {
     padding: 15px;
     border-radius: 10px 10px 0 0;
@@ -32,6 +36,11 @@
 
     &--source {
       color: #eeeeee;
+    }
+
+    &--servings {
+      color: #eeeeee;
+      font-size: 12px;
     }
   }
 

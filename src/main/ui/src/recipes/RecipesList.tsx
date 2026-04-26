@@ -10,7 +10,7 @@ type RecipesListProps = {
   ingredients: Set<Ingredient>
   onAddIngredientClick: (ingredient: Ingredient) => void
   onRemoveRecipeClick: (recipe: Recipe) => void
-  onHideRecipeClick: (recipe: Recipe) => void
+  onSelectRecipeClick: (recipe: Recipe) => void
 }
 
 const RecipesList = ({
@@ -18,11 +18,14 @@ const RecipesList = ({
                        ingredients,
                        onAddIngredientClick,
                        onRemoveRecipeClick,
-                       onHideRecipeClick,
+                       onSelectRecipeClick,
                      }: RecipesListProps): JSX.Element => {
 
   const [propositions, setPropositions] = useState<Ingredient[]>([])
-  const [rejectedPropositions, setRejectedPropositions] = useState<Set<string>>(new Set())
+  const [
+    rejectedPropositions,
+    setRejectedPropositions
+  ] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const ingredientsNames = new Set(Array.from(ingredients).map(i => i.name))
@@ -54,8 +57,8 @@ const RecipesList = ({
             data-testid={`RecipesList-propositions--${ingredient.name}`}
           >
             <i className="gg-add-r" onClick={() => onAddIngredientClick(ingredient)}/>
-            <div>{ingredient.name}</div>
             <i className="gg-close-r" onClick={() => onRemovePropositionClick(ingredient)}/>
+            <div>{ingredient.name}</div>
           </div>
         )}
       </div>
@@ -66,7 +69,8 @@ const RecipesList = ({
           recipe={recipe}
           ingredients={ingredients}
           onRemoveRecipeClick={() => onRemoveRecipeClick(recipe)}
-          onHideClick={() => onHideRecipeClick(recipe)}
+          onSelectClick={() => onSelectRecipeClick(recipe)}
+          key={recipe.id}
         />
       )}
     </div>

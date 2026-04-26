@@ -1,11 +1,12 @@
 import './IngredientsList.scss'
 import { RecipesStrings } from "../strings";
-import { NetworkService } from "../NetworkService";
+import { NetworkService, SortType } from "../NetworkService";
 import { Ingredient } from "../recipes/model";
 import { Search } from "../Search";
+import classNames from "classnames";
 
 type IngredientsListProps = {
-  onUpdateRecipesClick: (chosenIngredients: Set<Ingredient>) => void
+  onUpdateRecipesClick: (sortType: SortType) => void
   onAddIngredientClick: (ingredient: Ingredient) => void
   onRemoveIngredientClick: (ingredient: Ingredient) => void
   ingredients: Set<Ingredient>
@@ -26,29 +27,49 @@ const IngredientsList = ({
 
   const ingredientsList = ingredients.size !== 0 &&
     <div className={"IngredientsList-ingredients"}>
-      {Array.from(ingredients).map((ingredient: Ingredient) =>
-        <div
-          className={"IngredientsList-ingredients--ingredient"}
-          key={ingredient.id}
-          data-testid={`IngredientsList-ingredients--ingredient-${ingredient.name}`}
-        >
-          <i
-            className="gg-close-r"
-            onClick={() => onRemoveIngredientClick(ingredient)}
-            data-testid={`IngredientsList-ingredients--removeIngredient-${ingredient.name}`}
-          />
-          <div>{ingredient.name}</div>
-        </div>
+      {Array.from(ingredients).map((ingredient: Ingredient) => {
+          const vataBalance = ingredient.vataBalance;
+          const ingredientClassName = classNames(
+            "IngredientsList-ingredients--ingredient",
+            { "IngredientsList-ingredients--ingredient--very-balancing": vataBalance === "VERY_BALANCING" },
+            { "IngredientsList-ingredients--ingredient--balancing": vataBalance === "BALANCING" },
+            { "IngredientsList-ingredients--ingredient--aggravating": vataBalance === "AGGRAVATING" },
+            { "IngredientsList-ingredients--ingredient--very-aggravating": vataBalance === "VERY_AGGRAVATING" },
+          )
+          return (
+            <div
+              className={ingredientClassName}
+              key={ingredient.id}
+              data-testid={`IngredientsList-ingredients--ingredient-${ingredient.name}`}
+            >
+              <i
+                className="gg-close-r"
+                onClick={() => onRemoveIngredientClick(ingredient)}
+                data-testid={`IngredientsList-ingredients--removeIngredient-${ingredient.name}`}
+              />
+              <div>{ingredient.name}</div>
+            </div>
+          )
+        }
       )}
     </div>
 
-  const updateRecipesButton =
+  const updateRecipesByIngredientsButton =
     <button
       className={"IngredientsList-updateButton"}
-      onClick={() => onUpdateRecipesClick(ingredients)}
+      onClick={() => onUpdateRecipesClick("ingredients")}
       data-testid={'IngredientsList-ingredients--updateRecipes'}
     >
-      {RecipesStrings.INGREDIENTS_UPDATE_RECIPES}
+      Zaktualizuj przepisy po składnikach
+    </button>
+
+  const updateRecipesByCategoryButton =
+    <button
+      className={"IngredientsList-updateButton"}
+      onClick={() => onUpdateRecipesClick("category")}
+      data-testid={'IngredientsList-ingredients--updateRecipes'}
+    >
+      Zaktualizuj przepisy po kategorii
     </button>
 
   const clearIngredientsButton =
@@ -71,7 +92,8 @@ const IngredientsList = ({
         getItems={NetworkService.getIngredients}
         inputPlaceholder={RecipesStrings.INGREDIENTS_SEARCH_INPUT_PLACEHOLDER}
       />
-      {updateRecipesButton}
+      {updateRecipesByIngredientsButton}
+      {updateRecipesByCategoryButton}
       {clearIngredientsButton}
       {ingredientsList}
     </div>

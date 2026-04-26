@@ -1,12 +1,11 @@
 package com.example.kitchenproject.model;
 
 import com.example.kitchenproject.dto.QuantifiedIngredientOutputDto;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
 
 @Data
 @AllArgsConstructor

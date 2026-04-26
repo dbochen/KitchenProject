@@ -1,6 +1,7 @@
 package com.example.kitchenproject.dto;
 
-import com.example.kitchenproject.model.Category;
+import com.example.kitchenproject.model.Balance;
+import com.example.kitchenproject.model.Inflammation;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,4 +10,6 @@ import lombok.Data;
 public class IngredientOutputDto {
     private int id;
     private String name;
+    private Balance vataBalance;
+    private Inflammation inflammation;
 }

@@ -2,16 +2,14 @@ package com.example.kitchenproject.service;
 
 import com.example.kitchenproject.dto.RecipeInputDto;
 import com.example.kitchenproject.dto.RecipeOutputDto;
-import com.example.kitchenproject.model.Ingredient;
-import com.example.kitchenproject.model.QuantifiedIngredient;
-import com.example.kitchenproject.model.Recipe;
-import com.example.kitchenproject.model.Tag;
+import com.example.kitchenproject.model.*;
 import com.example.kitchenproject.repository.RecipeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -24,14 +22,14 @@ public class RecipeService {
         this.recipeRepository = recipeRepository;
     }
 
-    public List<RecipeOutputDto> getAllRecipes(String sort, String tagsString) {
-        List<Integer> ids = Arrays.stream(sort.split(","))
-                .filter(id -> !id.equals(""))
+    public List<RecipeOutputDto> getAllRecipes(String ingredientsSort, Category categorySort, String tagsString) {
+        List<Integer> ingredientsIds = Arrays.stream(ingredientsSort.split(","))
+                .filter(id -> !id.isEmpty())
                 .map(Integer::parseInt)
                 .collect(toList());
 
         Set<Integer> tagIds = Arrays.stream(tagsString.split(","))
-                .filter(id -> !id.equals(""))
+                .filter(id -> !id.isEmpty())
                 .map(Integer::parseInt)
                 .collect(toSet());
 
@@ -58,7 +56,7 @@ public class RecipeService {
                     .collect(toList());
             double appearanceCount = 0;
 
-            for (Integer id : ids) {
+            for (Integer id : ingredientsIds) {
                 if (ingredientsFromRecipes.contains(id)) {
                     appearanceCount++;
                 }
@@ -70,11 +68,21 @@ public class RecipeService {
 
         List<Map.Entry<Recipe, Double>> entries = new ArrayList<>(result.entrySet());
 
-        return entries.stream()
-                .sorted(Comparator.comparingDouble(entry -> -entry.getValue()))
+        final List<RecipeOutputDto> sortedByIngredients = entries.stream()
+                .sorted(comparingDouble(entry -> -entry.getValue()))
                 .map(Map.Entry::getKey)
                 .map(Recipe::toRecipeOutputDto)
                 .collect(toList());
+
+        if (categorySort != null) {
+            return sortedByIngredients.stream()
+                    .sorted(comparingDouble(
+                            recipe -> -recipe.getCategoryServings().getOrDefault(categorySort, 0.0)
+                    ))
+                    .collect(toList());
+        }
+
+        return sortedByIngredients;
     }
 
     public Recipe save(RecipeInputDto recipeDto) {

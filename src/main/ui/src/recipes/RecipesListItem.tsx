@@ -2,22 +2,25 @@ import { Ingredient, QuantifiedIngredient, Recipe } from "./model";
 import { formatUnit } from "./formatUnit";
 import "./RecipesListItem.scss"
 import classNames from 'classnames';
+import { useState } from "react";
 
 type RecipeListItemProps = {
   recipe: Recipe
   ingredients: Set<Ingredient>
   onRemoveRecipeClick: () => void
-  onHideClick: () => void
+  onSelectClick: () => void
 }
 
 const RecipesListItem = ({
                            recipe,
                            ingredients,
                            onRemoveRecipeClick,
-                           onHideClick
+                           onSelectClick
                          }: RecipeListItemProps): JSX.Element => {
 
-  const { name, id, quantifiedIngredients, source } = recipe;
+  const [selected, setSelected] = useState<boolean>(false);
+
+  const { name, id, quantifiedIngredients, source, categoryServings, balanceSum, inflammationSum } = recipe;
 
   const getIngredientString = (ingredient: QuantifiedIngredient) =>
     `${ingredient.ingredient.name} ${ingredient.quantity} ${formatUnit(ingredient.quantity, ingredient.unit)}`;
@@ -46,8 +49,18 @@ const RecipesListItem = ({
     }
   }
 
+  const onselectButtonClick = ()  => {
+    setSelected(!selected)
+    onSelectClick()
+  }
+
+  const wrapperClassNames = classNames(
+    "RecipesListItem",
+    { "RecipesListItem--selected": selected },
+  )
+
   return (
-    <div className={"RecipesListItem"} key={id}>
+    <div className={wrapperClassNames} key={id}>
       <div className={headerClassNames}>
         <div className={"RecipesListItem-header--name"}>
           {name.toUpperCase()}
@@ -55,8 +68,17 @@ const RecipesListItem = ({
         <div className={"RecipesListItem-header--source"}>
           {source}
         </div>
+        {/*<div className={"RecipesListItem-header--servings"}>*/}
+        {/*  {Object.entries(categoryServings)*/}
+        {/*    .map(([category, serving]) => `${category}: ${serving.toFixed(1)}`)*/}
+        {/*    .join(', ')}*/}
+        {/*</div>*/}
+        {/*<div className={"RecipesListItem-header--servings"}>*/}
+        {/*  {`balans: ${balanceSum}`}*/}
+        {/*  {` zapalnosc: ${inflammationSum}`}*/}
+        {/*</div>*/}
         <i className="gg-close-r" onClick={onRemoveClick}/>
-        <i className="gg-arrow-right-o" onClick={onHideClick}/>
+        <i className="gg-arrow-right-o" onClick={onselectButtonClick}/>
       </div>
       <div className={"RecipesListItem-ingredients"}>
         {`${ingredientsString} (${matchedIngredients.length}/${quantifiedIngredients.length})`}

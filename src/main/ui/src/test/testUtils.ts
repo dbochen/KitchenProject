@@ -9,10 +9,14 @@ export const getRecipe = (name: string, ingredientsNames: string[] = []): Recipe
   })),
   source: "source",
   timeInMinutes: 1,
-  id: Math.floor(Math.random() * 1000)
+  id: Math.floor(Math.random() * 1000),
+  categoryServings: {},
+  balanceSum: 0,
+  inflammationSum: 0,
 })
 
 export const getIngredient = (name: string): Ingredient => ({
   name,
-  id: Math.floor(Math.random() * 1000)
+  id: Math.floor(Math.random() * 1000),
+  vataBalance: "BALANCING",
 })

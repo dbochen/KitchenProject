@@ -2,13 +2,14 @@ package com.example.kitchenproject.controller;
 
 import com.example.kitchenproject.dto.RecipeInputDto;
 import com.example.kitchenproject.dto.RecipeOutputDto;
+import com.example.kitchenproject.model.Category;
 import com.example.kitchenproject.model.Recipe;
 import com.example.kitchenproject.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 import static com.example.kitchenproject.config.Config.UI_ORIGIN;
@@ -26,10 +27,11 @@ public class RecipeController {
 
     @GetMapping("/recipes")
     public List<RecipeOutputDto> getRecipes(
-            @RequestParam(required = false, defaultValue = "") String sort,
+            @RequestParam(required = false, defaultValue = "") String ingredientsSort,
+            @RequestParam(required = false) Category categorySort,
             @RequestParam(required = false, defaultValue = "") String tags
     ) {
-        return recipeService.getAllRecipes(sort, tags);
+        return recipeService.getAllRecipes(ingredientsSort, categorySort, tags);
     }
 
     @PostMapping("/recipes")
