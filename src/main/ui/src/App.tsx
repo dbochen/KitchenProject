@@ -169,6 +169,10 @@ const App = (): JSX.Element => {
       .catch(() => alert("Wywaliło się :("))
   }
 
+  const onRecipeEdited = (updatedRecipe: Recipe) => {
+    setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+  }
+
   const onSelectRecipeClick = (recipe: Recipe) => {
     const index = selectedRecipes.findIndex(r => r.id === recipe.id)
     if (index > -1) {
@@ -197,6 +201,7 @@ const App = (): JSX.Element => {
         onAddIngredientClick={onAddIngredientClick}
         onRemoveRecipeClick={onRemoveRecipeClick}
         onSelectRecipeClick={onSelectRecipeClick}
+        onRecipeEdited={onRecipeEdited}
       />
       <div>
         <AddRecipe/>

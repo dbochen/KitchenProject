@@ -1,6 +1,7 @@
 package com.example.kitchenproject.controller;
 
 import com.example.kitchenproject.dto.RecipeInputDto;
+import com.example.kitchenproject.dto.UpdateRecipeDto;
 import com.example.kitchenproject.dto.RecipeOutputDto;
 import com.example.kitchenproject.model.Category;
 import com.example.kitchenproject.model.Recipe;
@@ -15,7 +16,8 @@ import java.util.List;
 import static com.example.kitchenproject.config.Config.UI_ORIGIN;
 
 @RestController
-@CrossOrigin(origins = UI_ORIGIN)
+@CrossOrigin(origins = UI_ORIGIN, methods = {RequestMethod.GET, RequestMethod.POST,
+        RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
 @Validated
 public class RecipeController {
 
@@ -52,5 +54,10 @@ public class RecipeController {
     @PutMapping("/recipes/{id}")
     public void addTags(@PathVariable Integer id, @RequestBody List<Integer> tagIds) {
         recipeService.addTagsToRecipe(id, tagIds);
+    }
+
+    @PatchMapping("/recipes/{id}/ingredients")
+    public RecipeOutputDto updateRecipe(@PathVariable Integer id, @Valid @RequestBody UpdateRecipeDto dto) {
+        return recipeService.updateRecipe(id, dto);
     }
 }

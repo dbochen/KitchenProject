@@ -16,6 +16,11 @@
     padding: 15px;
     border-radius: 10px 10px 0 0;
 
+    .gg-pen {
+      transform: translateY(3px);
+      cursor: pointer;
+    }
+
     &--complete {
       background: linear-gradient(90deg, rgb(50, 173, 55) 0%, rgb(255, 229, 71) 100%);
     }

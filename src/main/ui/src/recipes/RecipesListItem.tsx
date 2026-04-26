@@ -3,22 +3,26 @@ import { formatUnit } from "./formatUnit";
 import "./RecipesListItem.scss"
 import classNames from 'classnames';
 import { useState } from "react";
+import EditRecipeModal from "./EditRecipeModal";
 
 type RecipeListItemProps = {
   recipe: Recipe
   ingredients: Set<Ingredient>
   onRemoveRecipeClick: () => void
   onSelectClick: () => void
+  onRecipeEdited: (updatedRecipe: Recipe) => void
 }
 
 const RecipesListItem = ({
                            recipe,
                            ingredients,
                            onRemoveRecipeClick,
-                           onSelectClick
+                           onSelectClick,
+                           onRecipeEdited,
                          }: RecipeListItemProps): JSX.Element => {
 
   const [selected, setSelected] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 
   const { name, id, quantifiedIngredients, source, categoryServings, balanceSum, inflammationSum } = recipe;
 
@@ -77,12 +81,20 @@ const RecipesListItem = ({
         {/*  {`balans: ${balanceSum}`}*/}
         {/*  {` zapalnosc: ${inflammationSum}`}*/}
         {/*</div>*/}
+        <i className="gg-pen" onClick={() => setIsEditModalOpen(true)}/>
         <i className="gg-close-r" onClick={onRemoveClick}/>
         <i className="gg-arrow-right-o" onClick={onselectButtonClick}/>
       </div>
       <div className={"RecipesListItem-ingredients"}>
         {`${ingredientsString} (${matchedIngredients.length}/${quantifiedIngredients.length})`}
       </div>
+      {isEditModalOpen && (
+        <EditRecipeModal
+          recipe={recipe}
+          onClose={() => setIsEditModalOpen(false)}
+          onSaved={onRecipeEdited}
+        />
+      )}
     </div>
   )
 }

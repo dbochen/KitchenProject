@@ -22,6 +22,9 @@ export interface NetworkServiceProvider {
   addRecipe: (recipe: AddRecipeRequest) => Promise<void>
   addTag: (tagName: string) => Promise<void>
   deleteRecipe: (recipe: Recipe) => Promise<void>
+  updateRecipe: (
+    id: number, name: string, ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>
+  ) => Promise<Recipe>
 }
 
 interface AddRecipeRequest {
@@ -52,6 +55,10 @@ export const NetworkService: NetworkServiceProvider = {
     (await axiosInstance.get(`/ingredients?search=${query}&limit=${limit}`)).data,
   addRecipe: async (recipe: AddRecipeRequest): Promise<void> => axiosInstance.post("/recipes", recipe),
   addTag: async (tag: string): Promise<void> => axiosInstance.post('/tags', { name: tag }),
-  deleteRecipe: async ({ id }: Recipe): Promise<void> => axiosInstance.delete(`/recipes/${id}`)
+  deleteRecipe: async ({ id }: Recipe): Promise<void> => axiosInstance.delete(`/recipes/${id}`),
+  updateRecipe: async (
+    id: number, name: string, ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>
+  ): Promise<Recipe> =>
+    (await axiosInstance.patch(`/recipes/${id}/ingredients`, { name, ingredients })).data,
 }
 

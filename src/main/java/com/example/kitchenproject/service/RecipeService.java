@@ -1,6 +1,8 @@
 package com.example.kitchenproject.service;
 
+import com.example.kitchenproject.dto.QuantifiedIngredientInputDto;
 import com.example.kitchenproject.dto.RecipeInputDto;
+import com.example.kitchenproject.dto.UpdateRecipeDto;
 import com.example.kitchenproject.dto.RecipeOutputDto;
 import com.example.kitchenproject.model.*;
 import com.example.kitchenproject.repository.RecipeRepository;
@@ -101,5 +103,14 @@ public class RecipeService {
         var recipe = recipeRepository.findById(id).orElseThrow();
         recipe.setTags(tagIds.stream().map(tagId -> Tag.builder().id(tagId).build()).collect(toSet()));
         recipeRepository.save(recipe);
+    }
+
+    public RecipeOutputDto updateRecipe(Integer id, UpdateRecipeDto dto) {
+        var recipe = recipeRepository.findById(id).orElseThrow();
+        recipe.setName(dto.getName());
+        recipe.setQuantifiedIngredients(dto.getIngredients().stream()
+                .map(QuantifiedIngredientInputDto::toQuantifiedIngredient)
+                .collect(toList()));
+        return recipeRepository.save(recipe).toRecipeOutputDto();
     }
 }

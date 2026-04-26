@@ -11,6 +11,7 @@ type RecipesListProps = {
   onAddIngredientClick: (ingredient: Ingredient) => void
   onRemoveRecipeClick: (recipe: Recipe) => void
   onSelectRecipeClick: (recipe: Recipe) => void
+  onRecipeEdited: (updatedRecipe: Recipe) => void
 }
 
 const RecipesList = ({
@@ -19,6 +20,7 @@ const RecipesList = ({
                        onAddIngredientClick,
                        onRemoveRecipeClick,
                        onSelectRecipeClick,
+                       onRecipeEdited,
                      }: RecipesListProps): JSX.Element => {
 
   const [propositions, setPropositions] = useState<Ingredient[]>([])
@@ -70,6 +72,7 @@ const RecipesList = ({
           ingredients={ingredients}
           onRemoveRecipeClick={() => onRemoveRecipeClick(recipe)}
           onSelectClick={() => onSelectRecipeClick(recipe)}
+          onRecipeEdited={onRecipeEdited}
           key={recipe.id}
         />
       )}
