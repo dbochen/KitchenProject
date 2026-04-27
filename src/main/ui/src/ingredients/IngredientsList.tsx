@@ -3,7 +3,6 @@ import { RecipesStrings } from "../strings";
 import { NetworkService, SortType } from "../NetworkService";
 import { Ingredient } from "../recipes/model";
 import { Search } from "../Search";
-import classNames from "classnames";
 
 type IngredientsListProps = {
   onUpdateRecipesClick: (sortType: SortType) => void
@@ -28,17 +27,9 @@ const IngredientsList = ({
   const ingredientsList = ingredients.size !== 0 &&
     <div className={"IngredientsList-ingredients"}>
       {Array.from(ingredients).map((ingredient: Ingredient) => {
-          const vataBalance = ingredient.vataBalance;
-          const ingredientClassName = classNames(
-            "IngredientsList-ingredients--ingredient",
-            { "IngredientsList-ingredients--ingredient--very-balancing": vataBalance === "VERY_BALANCING" },
-            { "IngredientsList-ingredients--ingredient--balancing": vataBalance === "BALANCING" },
-            { "IngredientsList-ingredients--ingredient--aggravating": vataBalance === "AGGRAVATING" },
-            { "IngredientsList-ingredients--ingredient--very-aggravating": vataBalance === "VERY_AGGRAVATING" },
-          )
           return (
             <div
-              className={ingredientClassName}
+              className={"IngredientsList-ingredients--ingredient"}
               key={ingredient.id}
               data-testid={`IngredientsList-ingredients--ingredient-${ingredient.name}`}
             >

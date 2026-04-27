@@ -77,6 +77,36 @@
     }
   }
 
+  &-scores {
+    display: flex;
+    gap: 4px;
+    padding: 8px 15px 4px;
+
+    &--item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    &--track {
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+    }
+
+    &--label {
+      font-size: 9px;
+      text-align: center;
+      color: #999;
+    }
+
+    &--fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+  }
+
   &-ingredients {
     padding: 15px;
   }

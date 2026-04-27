@@ -1,17 +1,21 @@
-import { Ingredient, Recipe, Tag } from "./model";
+import { Ingredient, Recipe, RecipeScores, Tag } from "./model";
 import RecipesListItem from "./RecipesListItem";
 import { RecipesStrings } from "../strings";
 import "./RecipesList.scss"
 import { useEffect, useState } from "react";
 import { uniqBy } from "lodash"
 import TagFilter from "../tags/TagFilter";
+import SortStrategyPicker, { SortStrategy } from "./SortStrategyPicker";
 
 type RecipesListProps = {
   recipes: Recipe[]
   ingredients: Set<Ingredient>
   allTags: Tag[]
   selectedTagIds: Set<number>
+  sortStrategy: SortStrategy
+  recipeScores: Map<number, RecipeScores>
   onTagToggle: (tag: Tag) => void
+  onSortStrategyChange: (strategy: SortStrategy) => void
   onAddIngredientClick: (ingredient: Ingredient) => void
   onRemoveRecipeClick: (recipe: Recipe) => void
   onSelectRecipeClick: (recipe: Recipe) => void
@@ -23,7 +27,10 @@ const RecipesList = ({
                        ingredients,
                        allTags,
                        selectedTagIds,
+                       sortStrategy,
+                       recipeScores,
                        onTagToggle,
+                       onSortStrategyChange,
                        onAddIngredientClick,
                        onRemoveRecipeClick,
                        onSelectRecipeClick,
@@ -74,11 +81,13 @@ const RecipesList = ({
       <div className={"RecipesList-header"}>
         {RecipesStrings.RECIPES_LIST_HEADER}
       </div>
+      <SortStrategyPicker selected={sortStrategy} onChange={onSortStrategyChange}/>
       <TagFilter allTags={allTags} selectedTagIds={selectedTagIds} onTagToggle={onTagToggle}/>
       {recipes.map(recipe => <RecipesListItem
           recipe={recipe}
           ingredients={ingredients}
           allTags={allTags}
+          scores={recipeScores.get(recipe.id)}
           onRemoveRecipeClick={() => onRemoveRecipeClick(recipe)}
           onSelectClick={() => onSelectRecipeClick(recipe)}
           onRecipeEdited={onRecipeEdited}

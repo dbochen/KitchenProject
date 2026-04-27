@@ -1,3 +1,11 @@
+export type RecipeScores = {
+  ingredients: number;
+  balance: number;
+  inflammation: number;
+  servings: number;
+  standard: number;
+}
+
 export type Recipe = {
   name: string,
   quantifiedIngredients: QuantifiedIngredient[],

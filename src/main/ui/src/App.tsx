@@ -1,13 +1,63 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import './App.scss'
 import RecipesList from "./recipes/RecipesList";
 import IngredientsList from "./ingredients/IngredientsList";
-import { categoryToDailyServings, Ingredient, Recipe, Tag } from "./recipes/model";
+import { categoryToDailyServings, Ingredient, Recipe, RecipeScores, Tag } from "./recipes/model";
 import { NetworkService, Sort, SortType } from "./NetworkService";
 import AddRecipe from "./recipes/AddRecipe";
 import { AddTag } from "./tags/AddTag";
 import { Menu } from "./menu/Menu";
+import { SortStrategy } from "./recipes/SortStrategyPicker";
 import * as _ from "lodash";
+
+const normalize = (value: number, min: number, max: number): number =>
+  max === min ? 0 : (value - min) / (max - min);
+
+const avgBalance = (recipe: Recipe): number =>
+  recipe.quantifiedIngredients.length > 0
+    ? recipe.balanceSum / recipe.quantifiedIngredients.length
+    : 0;
+
+const avgInflammation = (recipe: Recipe): number =>
+  recipe.quantifiedIngredients.length > 0
+    ? recipe.inflammationSum / recipe.quantifiedIngredients.length
+    : 0;
+
+const sortRecipes = (
+  recipesInput: Recipe[],
+  strategy: SortStrategy,
+  chosenIngredientsNames: Set<string>,
+  worstCategory: string,
+): Recipe[] => {
+  if (strategy === "random") {
+    return _.sortBy(recipesInput, () => Math.random());
+  }
+
+  const balanceAvgs = recipesInput.map(avgBalance);
+  const inflammationAvgs = recipesInput.map(avgInflammation);
+  const maxBalance = balanceAvgs.length > 0 ? Math.max(...balanceAvgs) : 0;
+  const minBalance = balanceAvgs.length > 0 ? Math.min(...balanceAvgs) : 0;
+  const maxInflammation = inflammationAvgs.length > 0 ? Math.max(...inflammationAvgs) : 0;
+  const minInflammation = inflammationAvgs.length > 0 ? Math.min(...inflammationAvgs) : 0;
+  const maxServings = _.maxBy(recipesInput, (r: Recipe) => r.categoryServings[worstCategory])
+    ?.categoryServings[worstCategory] ?? 0;
+
+  return _.sortBy(recipesInput, (recipe: Recipe) => {
+    const matchedRatio = recipe.quantifiedIngredients.length > 0
+      ? recipe.quantifiedIngredients.filter(qi => chosenIngredientsNames.has(qi.ingredient.name)).length
+        / recipe.quantifiedIngredients.length
+      : 0;
+    const balanceNorm = normalize(avgBalance(recipe), minBalance, maxBalance);
+    const inflammationNorm = normalize(avgInflammation(recipe), minInflammation, maxInflammation);
+    const servingsNorm = normalize(recipe.categoryServings[worstCategory] ?? 0, 0, maxServings);
+
+    const standardScore = matchedRatio + balanceNorm - inflammationNorm + servingsNorm;
+    if (strategy === "ingredients") return -(matchedRatio * 1000 + standardScore);
+    if (strategy === "balance") return -(balanceNorm * 1000 + standardScore);
+    if (strategy === "inflammation") return inflammationNorm * 1000 - standardScore;
+    return -standardScore;
+  });
+};
 
 const App = (): JSX.Element => {
 
@@ -23,6 +73,7 @@ const App = (): JSX.Element => {
   const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [selectedTagIds, setSelectedTagIds] = useState<Set<number>>(new Set())
+  const [sortStrategy, setSortStrategy] = useState<SortStrategy>("standard")
 
   useEffect(() => {
     fetchRecipes({ type: "ingredients", ingredients: "" })
@@ -36,81 +87,13 @@ const App = (): JSX.Element => {
 
   const fetchRecipes = async (sort: Sort): Promise<void> => {
     const recipesResponse = await NetworkService.getRecipes(sort);
-    setRecipes(sortRecipes(recipesResponse))
+    setRecipes(recipesResponse)
   }
 
-  const sortRecipes = (recipesResponse: Recipe[]): Recipe[] => {
-
-    const maxBalanceSum = _.maxBy(recipesResponse, (recipe: Recipe) => recipe.balanceSum)?.balanceSum
-    const minBalanceSum = _.minBy(recipesResponse, (recipe: Recipe) => recipe.balanceSum)?.balanceSum
-
-    const maxInflammationSum = _.maxBy(recipesResponse, (recipe: Recipe) => recipe.inflammationSum)?.inflammationSum
-    const minInflammationSum = _.minBy(recipesResponse, (recipe: Recipe) => recipe.inflammationSum)?.inflammationSum
-
-    const maxServings = _.maxBy(
-      recipesResponse,
-      (recipe: Recipe) => recipe.categoryServings[worstCategory]
-    )?.categoryServings[worstCategory]
-    const minServings = 0
-
-    // 50% of cases use the standard formula
-    if (Math.random() > 0.5) {
-      console.log("Martyna - standard formula")
-      return _.sortBy(recipesResponse, (recipe: Recipe) => {
-        const matchedIngredients = recipe.quantifiedIngredients
-          .filter(ingredient => chosenIngredientsNames.has(ingredient.ingredient.name))
-        const matchedIngredientsNormalized = matchedIngredients.length / recipe.quantifiedIngredients.length
-        const balanceSumNormalized = (recipe.balanceSum - minBalanceSum) /
-          (maxBalanceSum - minBalanceSum)
-        const InflammationSumNormalized = (recipe.inflammationSum - minInflammationSum) /
-          (maxInflammationSum - minInflammationSum)
-        const worstCategoryNormalized = (recipe.categoryServings[worstCategory] ?? 0 - minServings) /
-          (maxServings - minServings)
-        return -(
-          matchedIngredientsNormalized
-          + balanceSumNormalized
-          - InflammationSumNormalized
-          + worstCategoryNormalized
-        )
-      })
-      // in 50% of cases do not use the formula
-    } else {
-      console.log("Martyna - custom formula")
-      const random = Math.random()
-      if (random < 0.25) {
-        console.log("Martyna - sort by matched ingredients")
-        return _.sortBy(recipesResponse, (recipe: Recipe) => {
-          const matchedIngredients = recipe.quantifiedIngredients
-            .filter(ingredient => chosenIngredientsNames.has(ingredient.ingredient.name))
-          const matchedIngredientsNormalized = matchedIngredients.length / recipe.quantifiedIngredients.length
-          return -matchedIngredientsNormalized
-        })
-      } else if (random < 0.5) {
-        console.log("Martyna - sort by balance")
-        return _.sortBy(recipesResponse, (recipe: Recipe) => {
-          const balanceSumNormalized = (recipe.balanceSum - minBalanceSum) /
-            (maxBalanceSum - minBalanceSum)
-          return -balanceSumNormalized
-        })
-      } else if (random < 0.75) {
-        console.log("Martyna - sort by inflammation")
-        return _.sortBy(recipesResponse, (recipe: Recipe) => {
-          const inflammationSumNormalized = (recipe.inflammationSum - minInflammationSum) /
-            (maxInflammationSum - minInflammationSum)
-          return inflammationSumNormalized
-        })
-      } else {
-        console.log("Martyna - random")
-        return _.sortBy(recipesResponse, (recipe: Recipe) => {
-          return Math.random()
-        })
-      }
-    }
-  }
-
-  const chosenIngredientsNames = new Set(Array.from(chosenIngredients).map(ci => ci.name));
-
-  // xnormalized = (x - xminimum) / range of x
+  const chosenIngredientsNames = useMemo(
+    () => new Set(Array.from(chosenIngredients).map(ci => ci.name)),
+    [chosenIngredients]
+  );
 
   const getCategoryToSelectedServings = () => {
     const categoryToSelectedServings: { [key: string]: number } = {};
@@ -136,6 +119,43 @@ const App = (): JSX.Element => {
     .sort((a, b) => b.percentage - a.percentage);
 
   const worstCategory = sortedCategoriesAndServings[8].category
+
+  const sortedRecipes = useMemo(
+    () => sortRecipes(recipes, sortStrategy, chosenIngredientsNames, worstCategory),
+    [recipes, sortStrategy, chosenIngredientsNames, worstCategory]
+  );
+
+  const recipeScores = useMemo((): Map<number, RecipeScores> => {
+    const balanceAvgs = recipes.map(avgBalance);
+    const inflammationAvgs = recipes.map(avgInflammation);
+    const maxBalance = balanceAvgs.length > 0 ? Math.max(...balanceAvgs) : 0;
+    const minBalance = balanceAvgs.length > 0 ? Math.min(...balanceAvgs) : 0;
+    const maxInflammation = inflammationAvgs.length > 0 ? Math.max(...inflammationAvgs) : 0;
+    const minInflammation = inflammationAvgs.length > 0 ? Math.min(...inflammationAvgs) : 0;
+    const maxServings = _.maxBy(recipes, (r: Recipe) => r.categoryServings[worstCategory])
+      ?.categoryServings[worstCategory] ?? 0;
+
+    const partial = recipes.map((recipe, i) => {
+      const ingredients = recipe.quantifiedIngredients.length > 0
+        ? recipe.quantifiedIngredients
+            .filter(qi => chosenIngredientsNames.has(qi.ingredient.name)).length
+          / recipe.quantifiedIngredients.length
+        : 0;
+      const balance = normalize(balanceAvgs[i], minBalance, maxBalance);
+      const inflammation = 1 - normalize(inflammationAvgs[i], minInflammation, maxInflammation);
+      const servings = normalize(recipe.categoryServings[worstCategory] ?? 0, 0, maxServings);
+      return { id: recipe.id, ingredients, balance, inflammation, servings };
+    });
+
+    const standardRaws = partial.map(s => s.ingredients + s.balance + s.inflammation + s.servings);
+    const minStandard = Math.min(...standardRaws);
+    const maxStandard = Math.max(...standardRaws);
+
+    return new Map(partial.map((s, i) => [
+      s.id,
+      { ...s, standard: normalize(standardRaws[i], minStandard, maxStandard) },
+    ]));
+  }, [recipes, chosenIngredientsNames, worstCategory]);
 
   const onUpdateRecipesClick = (sortType: SortType) => {
     const ingredients = Array.from(chosenIngredients).map(ingredient => ingredient.id).join(',');
@@ -194,8 +214,8 @@ const App = (): JSX.Element => {
   }
 
   const filteredRecipes = selectedTagIds.size === 0
-    ? recipes
-    : recipes.filter(recipe =>
+    ? sortedRecipes
+    : sortedRecipes.filter(recipe =>
         Array.from(selectedTagIds).some(tagId => {
           const tag = allTags.find(t => t.id === tagId)
           return tag && recipe.tags?.includes(tag.name)
@@ -216,7 +236,10 @@ const App = (): JSX.Element => {
         ingredients={chosenIngredients}
         allTags={allTags}
         selectedTagIds={selectedTagIds}
+        sortStrategy={sortStrategy}
+        recipeScores={recipeScores}
         onTagToggle={onTagToggle}
+        onSortStrategyChange={setSortStrategy}
         onAddIngredientClick={onAddIngredientClick}
         onRemoveRecipeClick={onRemoveRecipeClick}
         onSelectRecipeClick={onSelectRecipeClick}

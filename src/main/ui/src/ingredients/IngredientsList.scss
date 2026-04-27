@@ -32,25 +32,7 @@
         cursor: pointer;
       }
 
-      &--very-balancing {
-        background: linear-gradient(90deg, rgb(52, 152, 219) 0%, rgb(50, 173, 55) 100%);
-        color: #ffffff;
-      }
 
-      &--balancing {
-        background: linear-gradient(90deg,  rgb(50, 173, 55) 0%, rgb(255, 219, 48) 100%);
-        color: #ffffff;
-      }
-
-      &--aggravating {
-        background: linear-gradient(90deg, rgb(255, 219, 48) 0%, rgb(217, 130, 64) 100%);
-        color: #ffffff;
-      }
-
-      &--very-aggravating {
-        background: linear-gradient(90deg, rgb(255, 141, 53) 0%, rgb(210, 35, 35) 100%);
-        color: #ffffff;
-      }
     }
   }
 
