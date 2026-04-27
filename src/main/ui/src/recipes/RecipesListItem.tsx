@@ -81,9 +81,13 @@ const RecipesListItem = ({
         {/*  {`balans: ${balanceSum}`}*/}
         {/*  {` zapalnosc: ${inflammationSum}`}*/}
         {/*</div>*/}
-        <i className="gg-pen" onClick={() => setIsEditModalOpen(true)}/>
-        <i className="gg-close-r" onClick={onRemoveClick}/>
-        <i className="gg-arrow-right-o" onClick={onselectButtonClick}/>
+        <div className={"RecipesListItem-header--icons"}>
+          <div className={"RecipesListItem-header--icons--pen"} onClick={() => setIsEditModalOpen(true)}>
+            <i className="gg-pen"/>
+          </div>
+          <i className="gg-close-r" onClick={onRemoveClick}/>
+          <i className="gg-arrow-right-o" onClick={onselectButtonClick}/>
+        </div>
       </div>
       <div className={"RecipesListItem-ingredients"}>
         {`${ingredientsString} (${matchedIngredients.length}/${quantifiedIngredients.length})`}

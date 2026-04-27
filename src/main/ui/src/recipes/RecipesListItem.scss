@@ -16,9 +16,22 @@
     padding: 15px;
     border-radius: 10px 10px 0 0;
 
-    .gg-pen {
-      transform: translateY(3px);
+    &--icons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
       cursor: pointer;
+
+      &--pen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        margin: -8px;
+        cursor: pointer;
+      }
     }
 
     &--complete {
