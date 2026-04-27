@@ -1,4 +1,4 @@
-import { Ingredient, QuantifiedIngredient, Recipe } from "./model";
+import { Ingredient, QuantifiedIngredient, Recipe, Tag } from "./model";
 import { formatUnit } from "./formatUnit";
 import "./RecipesListItem.scss"
 import classNames from 'classnames';
@@ -8,6 +8,7 @@ import EditRecipeModal from "./EditRecipeModal";
 type RecipeListItemProps = {
   recipe: Recipe
   ingredients: Set<Ingredient>
+  allTags: Tag[]
   onRemoveRecipeClick: () => void
   onSelectClick: () => void
   onRecipeEdited: (updatedRecipe: Recipe) => void
@@ -16,6 +17,7 @@ type RecipeListItemProps = {
 const RecipesListItem = ({
                            recipe,
                            ingredients,
+                           allTags,
                            onRemoveRecipeClick,
                            onSelectClick,
                            onRecipeEdited,
@@ -24,7 +26,7 @@ const RecipesListItem = ({
   const [selected, setSelected] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 
-  const { name, id, quantifiedIngredients, source, categoryServings, balanceSum, inflammationSum } = recipe;
+  const { name, id, quantifiedIngredients, source } = recipe;
 
   const getIngredientString = (ingredient: QuantifiedIngredient) =>
     `${ingredient.ingredient.name} ${ingredient.quantity} ${formatUnit(ingredient.quantity, ingredient.unit)}`;
@@ -53,7 +55,7 @@ const RecipesListItem = ({
     }
   }
 
-  const onselectButtonClick = ()  => {
+  const onselectButtonClick = () => {
     setSelected(!selected)
     onSelectClick()
   }
@@ -72,15 +74,13 @@ const RecipesListItem = ({
         <div className={"RecipesListItem-header--source"}>
           {source}
         </div>
-        {/*<div className={"RecipesListItem-header--servings"}>*/}
-        {/*  {Object.entries(categoryServings)*/}
-        {/*    .map(([category, serving]) => `${category}: ${serving.toFixed(1)}`)*/}
-        {/*    .join(', ')}*/}
-        {/*</div>*/}
-        {/*<div className={"RecipesListItem-header--servings"}>*/}
-        {/*  {`balans: ${balanceSum}`}*/}
-        {/*  {` zapalnosc: ${inflammationSum}`}*/}
-        {/*</div>*/}
+        {recipe.tags?.length > 0 && (
+          <div className={"RecipesListItem-header--tags"}>
+            {recipe.tags.map(tag => (
+              <span key={tag} className={"RecipesListItem-header--tags--chip"}>{tag}</span>
+            ))}
+          </div>
+        )}
         <div className={"RecipesListItem-header--icons"}>
           <div className={"RecipesListItem-header--icons--pen"} onClick={() => setIsEditModalOpen(true)}>
             <i className="gg-pen"/>
@@ -95,6 +95,7 @@ const RecipesListItem = ({
       {isEditModalOpen && (
         <EditRecipeModal
           recipe={recipe}
+          allTags={allTags}
           onClose={() => setIsEditModalOpen(false)}
           onSaved={onRecipeEdited}
         />

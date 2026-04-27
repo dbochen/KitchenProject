@@ -111,6 +111,11 @@ public class RecipeService {
         recipe.setQuantifiedIngredients(dto.getIngredients().stream()
                 .map(QuantifiedIngredientInputDto::toQuantifiedIngredient)
                 .collect(toList()));
+        if (dto.getTagIds() != null) {
+            recipe.setTags(dto.getTagIds().stream()
+                    .map(tagId -> Tag.builder().id(tagId).build())
+                    .collect(toSet()));
+        }
         return recipeRepository.save(recipe).toRecipeOutputDto();
     }
 }

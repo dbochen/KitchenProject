@@ -7,6 +7,12 @@ export type Recipe = {
   categoryServings: Record<string, number>,
   balanceSum: number,
   inflammationSum: number,
+  tags: string[],
+}
+
+export type Tag = {
+  id: number,
+  name: string,
 }
 
 export type QuantifiedIngredient = {

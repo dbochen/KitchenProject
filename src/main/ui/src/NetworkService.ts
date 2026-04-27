@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Ingredient, QuantityUnit, Recipe } from "./recipes/model";
+import { Ingredient, QuantityUnit, Recipe, Tag } from "./recipes/model";
 
 export type SortType = "ingredients" | "category";
 
@@ -19,11 +19,14 @@ type CategorySort = {
 export interface NetworkServiceProvider {
   getRecipes: (sort: Sort) => Promise<Recipe[]>
   getIngredients: (query: string, limit: number) => Promise<Ingredient[]>
+  getTags: () => Promise<Tag[]>
   addRecipe: (recipe: AddRecipeRequest) => Promise<void>
   addTag: (tagName: string) => Promise<void>
   deleteRecipe: (recipe: Recipe) => Promise<void>
   updateRecipe: (
-    id: number, name: string, ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>
+    id: number, name: string,
+    ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>,
+    tagIds: number[]
   ) => Promise<Recipe>
 }
 
@@ -53,12 +56,15 @@ export const NetworkService: NetworkServiceProvider = {
   },
   getIngredients: async (query: string, limit: number): Promise<Ingredient[]> =>
     (await axiosInstance.get(`/ingredients?search=${query}&limit=${limit}`)).data,
+  getTags: async (): Promise<Tag[]> =>
+    (await axiosInstance.get('/tags')).data,
   addRecipe: async (recipe: AddRecipeRequest): Promise<void> => axiosInstance.post("/recipes", recipe),
   addTag: async (tag: string): Promise<void> => axiosInstance.post('/tags', { name: tag }),
   deleteRecipe: async ({ id }: Recipe): Promise<void> => axiosInstance.delete(`/recipes/${id}`),
   updateRecipe: async (
-    id: number, name: string, ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>
+    id: number, name: string,
+    ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>,
+    tagIds: number[]
   ): Promise<Recipe> =>
-    (await axiosInstance.patch(`/recipes/${id}/ingredients`, { name, ingredients })).data,
+    (await axiosInstance.patch(`/recipes/${id}/ingredients`, { name, ingredients, tagIds })).data,
 }
-

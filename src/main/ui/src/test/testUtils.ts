@@ -13,6 +13,7 @@ export const getRecipe = (name: string, ingredientsNames: string[] = []): Recipe
   categoryServings: {},
   balanceSum: 0,
   inflammationSum: 0,
+  tags: [],
 })
 
 export const getIngredient = (name: string): Ingredient => ({

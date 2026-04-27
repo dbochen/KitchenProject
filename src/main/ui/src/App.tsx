@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import './App.scss'
 import RecipesList from "./recipes/RecipesList";
 import IngredientsList from "./ingredients/IngredientsList";
-import { categoryToDailyServings, Ingredient, Recipe } from "./recipes/model";
+import { categoryToDailyServings, Ingredient, Recipe, Tag } from "./recipes/model";
 import { NetworkService, Sort, SortType } from "./NetworkService";
 import AddRecipe from "./recipes/AddRecipe";
 import { AddTag } from "./tags/AddTag";
@@ -21,9 +21,12 @@ const App = (): JSX.Element => {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [chosenIngredients, setChosenIngredients] = useState<Set<Ingredient>>(getIngredientsFromStorage());
   const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([])
+  const [allTags, setAllTags] = useState<Tag[]>([])
+  const [selectedTagIds, setSelectedTagIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     fetchRecipes({ type: "ingredients", ingredients: "" })
+    NetworkService.getTags().then(setAllTags)
   }, [])
 
   useEffect(() => {
@@ -103,8 +106,6 @@ const App = (): JSX.Element => {
         })
       }
     }
-
-
   }
 
   const chosenIngredientsNames = new Set(Array.from(chosenIngredients).map(ci => ci.name));
@@ -186,6 +187,21 @@ const App = (): JSX.Element => {
     }
   }
 
+  const onTagToggle = (tag: Tag) => {
+    const updated = new Set(selectedTagIds)
+    updated.has(tag.id) ? updated.delete(tag.id) : updated.add(tag.id)
+    setSelectedTagIds(updated)
+  }
+
+  const filteredRecipes = selectedTagIds.size === 0
+    ? recipes
+    : recipes.filter(recipe =>
+        Array.from(selectedTagIds).some(tagId => {
+          const tag = allTags.find(t => t.id === tagId)
+          return tag && recipe.tags?.includes(tag.name)
+        })
+      )
+
   return (
     <div className="App">
       <IngredientsList
@@ -196,8 +212,11 @@ const App = (): JSX.Element => {
         onIngredientsClearClick={onIngredientsClearClick}
       />
       <RecipesList
-        recipes={recipes}
+        recipes={filteredRecipes}
         ingredients={chosenIngredients}
+        allTags={allTags}
+        selectedTagIds={selectedTagIds}
+        onTagToggle={onTagToggle}
         onAddIngredientClick={onAddIngredientClick}
         onRemoveRecipeClick={onRemoveRecipeClick}
         onSelectRecipeClick={onSelectRecipeClick}
