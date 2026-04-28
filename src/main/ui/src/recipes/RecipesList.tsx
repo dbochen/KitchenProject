@@ -2,7 +2,7 @@ import { Ingredient, Recipe, RecipeScores, Tag } from "./model";
 import RecipesListItem from "./RecipesListItem";
 import { RecipesStrings } from "../strings";
 import "./RecipesList.scss"
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 import { uniqBy } from "lodash"
 import TagFilter from "../tags/TagFilter";
 import SortStrategyPicker, { SortStrategy } from "./SortStrategyPicker";
@@ -12,6 +12,7 @@ type RecipesListProps = {
   ingredients: Set<Ingredient>
   allTags: Tag[]
   selectedTagIds: Set<number>
+  selectedRecipeIds: Set<number>
   sortStrategy: SortStrategy
   recipeScores: Map<number, RecipeScores>
   onTagToggle: (tag: Tag) => void
@@ -27,6 +28,7 @@ const RecipesList = ({
                        ingredients,
                        allTags,
                        selectedTagIds,
+                       selectedRecipeIds,
                        sortStrategy,
                        recipeScores,
                        onTagToggle,
@@ -88,6 +90,7 @@ const RecipesList = ({
           ingredients={ingredients}
           allTags={allTags}
           scores={recipeScores.get(recipe.id)}
+          selected={selectedRecipeIds.has(recipe.id)}
           onRemoveRecipeClick={() => onRemoveRecipeClick(recipe)}
           onSelectClick={() => onSelectRecipeClick(recipe)}
           onRecipeEdited={onRecipeEdited}

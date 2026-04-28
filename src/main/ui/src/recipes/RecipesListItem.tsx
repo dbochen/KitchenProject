@@ -10,6 +10,7 @@ type RecipeListItemProps = {
   ingredients: Set<Ingredient>
   allTags: Tag[]
   scores?: RecipeScores
+  selected: boolean
   onRemoveRecipeClick: () => void
   onSelectClick: () => void
   onRecipeEdited: (updatedRecipe: Recipe) => void
@@ -20,12 +21,12 @@ const RecipesListItem = ({
                            ingredients,
                            allTags,
                            scores,
+                           selected,
                            onRemoveRecipeClick,
                            onSelectClick,
                            onRecipeEdited,
                          }: RecipeListItemProps): JSX.Element => {
 
-  const [selected, setSelected] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 
   const { name, id, quantifiedIngredients, source } = recipe;
@@ -61,7 +62,6 @@ const RecipesListItem = ({
   }
 
   const onselectButtonClick = () => {
-    setSelected(!selected)
     onSelectClick()
   }
 

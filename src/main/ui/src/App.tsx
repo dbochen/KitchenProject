@@ -33,9 +33,10 @@ const sortRecipes = (
   strategy: SortStrategy,
   chosenIngredientsNames: Set<string>,
   categoryDeficiencies: Record<string, number>,
+  randomSortKeys: Map<number, number>,
 ): Recipe[] => {
   if (strategy === "random") {
-    return _.sortBy(recipesInput, () => Math.random());
+    return _.sortBy(recipesInput, (r: Recipe) => randomSortKeys.get(r.id) ?? 0);
   }
 
   const balanceAvgs = recipesInput.map(avgBalance);
@@ -62,6 +63,7 @@ const sortRecipes = (
     if (strategy === "ingredients") return -(matchedRatio * 1000 + standardScore);
     if (strategy === "balance") return -(balanceNorm * 1000 + standardScore);
     if (strategy === "inflammation") return inflammationNorm * 1000 - standardScore;
+    if (strategy === "servings") return -(servingsNorm * 1000 + standardScore);
     return -standardScore;
   });
 };
@@ -81,6 +83,7 @@ const App = (): JSX.Element => {
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [selectedTagIds, setSelectedTagIds] = useState<Set<number>>(new Set())
   const [sortStrategy, setSortStrategy] = useState<SortStrategy>("standard")
+  const [randomSortKeys, setRandomSortKeys] = useState<Map<number, number>>(new Map())
 
   useEffect(() => {
     fetchRecipes({ type: "ingredients", ingredients: "" })
@@ -91,6 +94,21 @@ const App = (): JSX.Element => {
     const chosenIngredientsAsString = JSON.stringify(Array.from(chosenIngredients))
     localStorage.setItem(INGREDIENTS_STORAGE_KEY, chosenIngredientsAsString)
   }, [chosenIngredients])
+
+  useEffect(() => {
+    setRandomSortKeys(prev => {
+      const recipeIdSet = new Set(recipes.map(r => r.id))
+      const next = new Map(prev)
+      let changed = false
+      recipes.forEach(r => {
+        if (!next.has(r.id)) { next.set(r.id, Math.random()); changed = true }
+      })
+      Array.from(next.keys()).forEach(id => {
+        if (!recipeIdSet.has(id)) { next.delete(id); changed = true }
+      })
+      return changed ? next : prev
+    })
+  }, [recipes])
 
   const fetchRecipes = async (sort: Sort): Promise<void> => {
     const recipesResponse = await NetworkService.getRecipes(sort);
@@ -141,8 +159,8 @@ const App = (): JSX.Element => {
   }, [selectedRecipes]);
 
   const sortedRecipes = useMemo(
-    () => sortRecipes(recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies),
-    [recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies]
+    () => sortRecipes(recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies, randomSortKeys),
+    [recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies, randomSortKeys]
   );
 
   const recipeScores = useMemo((): Map<number, RecipeScores> => {
@@ -204,6 +222,7 @@ const App = (): JSX.Element => {
 
   const onRecipeEdited = (updatedRecipe: Recipe) => {
     setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+    setSelectedRecipes(prev => prev.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
   }
 
   const onSelectRecipeClick = (recipe: Recipe) => {
@@ -247,6 +266,7 @@ const App = (): JSX.Element => {
         ingredients={chosenIngredients}
         allTags={allTags}
         selectedTagIds={selectedTagIds}
+        selectedRecipeIds={new Set(selectedRecipes.map(r => r.id))}
         sortStrategy={sortStrategy}
         recipeScores={recipeScores}
         onTagToggle={onTagToggle}

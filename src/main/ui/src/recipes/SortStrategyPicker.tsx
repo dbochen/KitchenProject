@@ -1,6 +1,6 @@
 import "./SortStrategyPicker.scss";
 
-export type SortStrategy = "standard" | "ingredients" | "balance" | "inflammation" | "random";
+export type SortStrategy = "standard" | "ingredients" | "balance" | "inflammation" | "servings" | "random";
 
 type SortStrategyPickerProps = {
   selected: SortStrategy;
@@ -12,6 +12,7 @@ const STRATEGIES: { value: SortStrategy; label: string }[] = [
   { value: "ingredients", label: "Składniki" },
   { value: "balance", label: "Balans" },
   { value: "inflammation", label: "Zapalenie" },
+  { value: "servings", label: "Greger" },
   { value: "random", label: "Losowo" },
 ];
 
