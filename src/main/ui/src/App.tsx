@@ -270,7 +270,12 @@ const App = (): JSX.Element => {
         sortStrategy={sortStrategy}
         recipeScores={recipeScores}
         onTagToggle={onTagToggle}
-        onSortStrategyChange={setSortStrategy}
+        onSortStrategyChange={(strategy) => {
+          if (strategy === "random") {
+            setRandomSortKeys(new Map(recipes.map(r => [r.id, Math.random()])))
+          }
+          setSortStrategy(strategy)
+        }}
         onAddIngredientClick={onAddIngredientClick}
         onRemoveRecipeClick={onRemoveRecipeClick}
         onSelectRecipeClick={onSelectRecipeClick}
