@@ -3,7 +3,7 @@ import './App.scss'
 import RecipesList from "./recipes/RecipesList";
 import IngredientsList from "./ingredients/IngredientsList";
 import { categoryToDailyServings, Ingredient, Recipe, RecipeScores, Tag } from "./recipes/model";
-import { NetworkService, Sort, SortType } from "./NetworkService";
+import { NetworkService, Sort } from "./NetworkService";
 import AddRecipe from "./recipes/AddRecipe";
 import { AddTag } from "./tags/AddTag";
 import { Menu } from "./menu/Menu";
@@ -23,11 +23,16 @@ const avgInflammation = (recipe: Recipe): number =>
     ? recipe.inflammationSum / recipe.quantifiedIngredients.length
     : 0;
 
+const gregersScore = (recipe: Recipe, categoryDeficiencies: Record<string, number>): number =>
+  Object.entries(categoryDeficiencies).reduce(
+    (sum, [cat, def]) => sum + (recipe.categoryServings[cat] ?? 0) * def, 0
+  );
+
 const sortRecipes = (
   recipesInput: Recipe[],
   strategy: SortStrategy,
   chosenIngredientsNames: Set<string>,
-  worstCategory: string,
+  categoryDeficiencies: Record<string, number>,
 ): Recipe[] => {
   if (strategy === "random") {
     return _.sortBy(recipesInput, () => Math.random());
@@ -39,8 +44,10 @@ const sortRecipes = (
   const minBalance = balanceAvgs.length > 0 ? Math.min(...balanceAvgs) : 0;
   const maxInflammation = inflammationAvgs.length > 0 ? Math.max(...inflammationAvgs) : 0;
   const minInflammation = inflammationAvgs.length > 0 ? Math.min(...inflammationAvgs) : 0;
-  const maxServings = _.maxBy(recipesInput, (r: Recipe) => r.categoryServings[worstCategory])
-    ?.categoryServings[worstCategory] ?? 0;
+  const gregersMap = new Map(
+    recipesInput.map(r => [r.id, gregersScore(r, categoryDeficiencies)])
+  );
+  const maxGregers = Math.max(0, ...Array.from(gregersMap.values()));
 
   return _.sortBy(recipesInput, (recipe: Recipe) => {
     const matchedRatio = recipe.quantifiedIngredients.length > 0
@@ -49,7 +56,7 @@ const sortRecipes = (
       : 0;
     const balanceNorm = normalize(avgBalance(recipe), minBalance, maxBalance);
     const inflammationNorm = normalize(avgInflammation(recipe), minInflammation, maxInflammation);
-    const servingsNorm = normalize(recipe.categoryServings[worstCategory] ?? 0, 0, maxServings);
+    const servingsNorm = normalize(gregersMap.get(recipe.id) ?? 0, 0, maxGregers);
 
     const standardScore = matchedRatio + balanceNorm - inflammationNorm + servingsNorm;
     if (strategy === "ingredients") return -(matchedRatio * 1000 + standardScore);
@@ -118,11 +125,24 @@ const App = (): JSX.Element => {
     })
     .sort((a, b) => b.percentage - a.percentage);
 
-  const worstCategory = sortedCategoriesAndServings[8].category
+  const categoryDeficiencies = useMemo((): Record<string, number> => {
+    const totalByCategory: Record<string, number> = {};
+    selectedRecipes.forEach(recipe => {
+      Object.entries(recipe.categoryServings).forEach(([category, servings]) => {
+        totalByCategory[category] = (totalByCategory[category] ?? 0) + servings;
+      });
+    });
+    return Object.fromEntries(
+      Object.entries(categoryToDailyServings).map(([category, dailyServings]) => {
+        const required = dailyServings * 7;
+        return [category, Math.max(0, 1 - (totalByCategory[category] ?? 0) / required)];
+      })
+    );
+  }, [selectedRecipes]);
 
   const sortedRecipes = useMemo(
-    () => sortRecipes(recipes, sortStrategy, chosenIngredientsNames, worstCategory),
-    [recipes, sortStrategy, chosenIngredientsNames, worstCategory]
+    () => sortRecipes(recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies),
+    [recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies]
   );
 
   const recipeScores = useMemo((): Map<number, RecipeScores> => {
@@ -132,8 +152,8 @@ const App = (): JSX.Element => {
     const minBalance = balanceAvgs.length > 0 ? Math.min(...balanceAvgs) : 0;
     const maxInflammation = inflammationAvgs.length > 0 ? Math.max(...inflammationAvgs) : 0;
     const minInflammation = inflammationAvgs.length > 0 ? Math.min(...inflammationAvgs) : 0;
-    const maxServings = _.maxBy(recipes, (r: Recipe) => r.categoryServings[worstCategory])
-      ?.categoryServings[worstCategory] ?? 0;
+    const gregersRaws = recipes.map(r => gregersScore(r, categoryDeficiencies));
+    const maxGregers = Math.max(0, ...gregersRaws);
 
     const partial = recipes.map((recipe, i) => {
       const ingredients = recipe.quantifiedIngredients.length > 0
@@ -143,7 +163,7 @@ const App = (): JSX.Element => {
         : 0;
       const balance = normalize(balanceAvgs[i], minBalance, maxBalance);
       const inflammation = 1 - normalize(inflammationAvgs[i], minInflammation, maxInflammation);
-      const servings = normalize(recipe.categoryServings[worstCategory] ?? 0, 0, maxServings);
+      const servings = normalize(gregersRaws[i], 0, maxGregers);
       return { id: recipe.id, ingredients, balance, inflammation, servings };
     });
 
@@ -155,15 +175,7 @@ const App = (): JSX.Element => {
       s.id,
       { ...s, standard: normalize(standardRaws[i], minStandard, maxStandard) },
     ]));
-  }, [recipes, chosenIngredientsNames, worstCategory]);
-
-  const onUpdateRecipesClick = (sortType: SortType) => {
-    const ingredients = Array.from(chosenIngredients).map(ingredient => ingredient.id).join(',');
-    const sort: Sort = sortType === "ingredients" ?
-      { type: "ingredients", ingredients } :
-      { type: "category", ingredients, category: sortedCategoriesAndServings[8].category };
-    fetchRecipes(sort)
-  }
+  }, [recipes, chosenIngredientsNames, categoryDeficiencies]);
 
   const onAddIngredientClick = (ingredient: Ingredient) => {
     const newIngredients = new Set(chosenIngredients)
@@ -226,7 +238,6 @@ const App = (): JSX.Element => {
     <div className="App">
       <IngredientsList
         ingredients={chosenIngredients}
-        onUpdateRecipesClick={onUpdateRecipesClick}
         onAddIngredientClick={onAddIngredientClick}
         onRemoveIngredientClick={onRemoveIngredientClick}
         onIngredientsClearClick={onIngredientsClearClick}

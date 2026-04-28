@@ -99,7 +99,7 @@ const RecipesListItem = ({
           {([
             { key: "ingredients", score: scores.ingredients, label: "Składniki" },
             { key: "balance", score: scores.balance, label: "Vata" },
-            { key: "inflammation", score: scores.inflammation, label: "Stan zapalny" },
+            { key: "inflammation", score: scores.inflammation, label: "Przeciwzapalność" },
             { key: "servings", score: scores.servings, label: "Greger" },
           ] as const).map(({ key, score, label }) => (
             <div key={key} className={"RecipesListItem-scores--item"}>
