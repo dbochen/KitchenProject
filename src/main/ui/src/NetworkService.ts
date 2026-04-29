@@ -20,9 +20,10 @@ export interface NetworkServiceProvider {
   getRecipes: (sort: Sort) => Promise<Recipe[]>
   getIngredients: (query: string, limit: number) => Promise<Ingredient[]>
   getTags: () => Promise<Tag[]>
-  addRecipe: (recipe: AddRecipeRequest) => Promise<void>
+  addRecipe: (recipe: AddRecipeRequest) => Promise<Recipe>
   addTag: (tagName: string) => Promise<void>
   deleteRecipe: (recipe: Recipe) => Promise<void>
+  deleteIngredient: (id: number) => Promise<void>
   updateRecipe: (
     id: number, name: string,
     ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>,
@@ -37,7 +38,8 @@ interface AddRecipeRequest {
     quantity: number,
     unit: QuantityUnit
   }>,
-  source: string
+  source?: string,
+  tagIds?: number[]
 }
 
 const axiosInstance = axios.create({ baseURL: "http://localhost:8080" })
@@ -58,9 +60,11 @@ export const NetworkService: NetworkServiceProvider = {
     (await axiosInstance.get(`/ingredients?search=${query}&limit=${limit}`)).data,
   getTags: async (): Promise<Tag[]> =>
     (await axiosInstance.get('/tags')).data,
-  addRecipe: async (recipe: AddRecipeRequest): Promise<void> => axiosInstance.post("/recipes", recipe),
+  addRecipe: async (recipe: AddRecipeRequest): Promise<Recipe> =>
+    (await axiosInstance.post("/recipes", recipe)).data,
   addTag: async (tag: string): Promise<void> => axiosInstance.post('/tags', { name: tag }),
   deleteRecipe: async ({ id }: Recipe): Promise<void> => axiosInstance.delete(`/recipes/${id}`),
+  deleteIngredient: async (id: number): Promise<void> => axiosInstance.delete(`/ingredients/${id}`),
   updateRecipe: async (
     id: number, name: string,
     ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>,

@@ -33,12 +33,20 @@ export type Ingredient = {
   name: string,
   id: number,
   vataBalance: "VERY_BALANCING" | "BALANCING" | "AGGRAVATING" | "VERY_AGGRAVATING",
+  storageLocation?: string,
 }
 
 export const QUANTITY_UNITS =
   ["PIECE", "GRAM", "TEA_SPOON", "TABLE_SPOON", "CUP", "LITER", "MILLILITER", "HANDFUL"] as const
 
 export type QuantityUnit = typeof QUANTITY_UNITS[number]
+
+export type InventoryItem = {
+  ingredient: Ingredient
+  quantity: number
+  unit: QuantityUnit
+  perishable?: boolean
+}
 
 export const categoryToDailyServings: Record<string, number> = {
   "NUTS_AND_SEEDS": 1,

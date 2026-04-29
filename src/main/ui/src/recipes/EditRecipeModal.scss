@@ -42,6 +42,21 @@
     }
   }
 
+  &-sourceInput {
+    font-size: 13px;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: #D95A40;
+    }
+  }
+
   &-ingredients {
     display: flex;
     flex-direction: column;

@@ -1,59 +1,152 @@
+import { useEffect, useMemo, useState } from "react";
 import './IngredientsList.scss'
 import { RecipesStrings } from "../strings";
 import { NetworkService } from "../NetworkService";
-import { Ingredient } from "../recipes/model";
+import { Ingredient, InventoryItem, QUANTITY_UNITS, QuantityUnit } from "../recipes/model";
+import { formatUnit } from "../recipes/formatUnit";
 import { Search } from "../Search";
 
+type InventoryListItemProps = {
+  item: InventoryItem
+  onUpdate: (ingredientId: number, quantity: number, unit: QuantityUnit) => void
+  onRemove: (ingredient: Ingredient) => void
+  onDelete: (ingredient: Ingredient) => void
+  onTogglePerishable: (ingredient: Ingredient) => void
+}
+
+const InventoryListItem = (
+  { item, onUpdate, onRemove, onDelete, onTogglePerishable }: InventoryListItemProps
+): JSX.Element => {
+  const [draftQuantity, setDraftQuantity] = useState(item.quantity)
+  const flagClass = [
+    "gg-flag IngredientsList-ingredients--flag",
+    item.perishable ? "IngredientsList-ingredients--flag-active" : "",
+  ].join(" ").trim()
+
+  useEffect(() => {
+    setDraftQuantity(item.quantity)
+  }, [item.quantity])
+
+  return (
+    <div
+      className="IngredientsList-ingredients--ingredient"
+      data-testid={`IngredientsList-ingredients--ingredient-${item.ingredient.name}`}
+    >
+      <i
+        className="gg-close-r"
+        onClick={() => onRemove(item.ingredient)}
+        data-testid={`IngredientsList-ingredients--removeIngredient-${item.ingredient.name}`}
+      />
+      <i
+        className="gg-trash"
+        onClick={() => onDelete(item.ingredient)}
+        data-testid={`IngredientsList-ingredients--deleteIngredient-${item.ingredient.name}`}
+      />
+      <i
+        className={flagClass}
+        onClick={() => onTogglePerishable(item.ingredient)}
+        title="Zużyj szybko"
+      />
+      <div className="IngredientsList-ingredients--name">{item.ingredient.name}</div>
+      <input
+        className="IngredientsList-ingredients--quantity"
+        type="number"
+        min={0}
+        value={draftQuantity}
+        onChange={e => setDraftQuantity(Number(e.target.value))}
+        onBlur={() => onUpdate(item.ingredient.id, draftQuantity, item.unit)}
+        onFocus={e => e.target.select()}
+      />
+      <select
+        className="IngredientsList-ingredients--unit"
+        value={item.unit}
+        onChange={e => onUpdate(item.ingredient.id, item.quantity, e.target.value as QuantityUnit)}
+      >
+        {QUANTITY_UNITS.map(unit => (
+          <option value={unit} key={unit}>{formatUnit(1, unit)}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 type IngredientsListProps = {
-  onAddIngredientClick: (ingredient: Ingredient) => void
-  onRemoveIngredientClick: (ingredient: Ingredient) => void
-  ingredients: Set<Ingredient>
-  onIngredientsClearClick: () => void
+  inventory: Map<number, InventoryItem>
+  onAddToInventory: (ingredient: Ingredient) => void
+  onRemoveFromInventory: (ingredient: Ingredient) => void
+  onUpdateInventoryItem: (ingredientId: number, quantity: number, unit: QuantityUnit) => void
+  onDeleteIngredient: (ingredient: Ingredient) => void
+  onTogglePerishable: (ingredient: Ingredient) => void
 }
 
 const IngredientsList = ({
-                           onAddIngredientClick,
-                           onRemoveIngredientClick,
-                           ingredients,
-                           onIngredientsClearClick
-                         }: IngredientsListProps): JSX.Element => {
+  inventory,
+  onAddToInventory,
+  onRemoveFromInventory,
+  onUpdateInventoryItem,
+  onDeleteIngredient,
+  onTogglePerishable,
+}: IngredientsListProps): JSX.Element => {
 
-  const ingredientsList = ingredients.size !== 0 &&
-    <div className={"IngredientsList-ingredients"}>
-      {Array.from(ingredients).map((ingredient: Ingredient) => (
-        <div
-          className={"IngredientsList-ingredients--ingredient"}
-          key={ingredient.id}
-          data-testid={`IngredientsList-ingredients--ingredient-${ingredient.name}`}
-        >
-          <i
-            className="gg-close-r"
-            onClick={() => onRemoveIngredientClick(ingredient)}
-            data-testid={`IngredientsList-ingredients--removeIngredient-${ingredient.name}`}
-          />
-          <div>{ingredient.name}</div>
-        </div>
-      ))}
-    </div>
+  const { locatedGroups, ungrouped } = useMemo(() => {
+    const groups: Record<string, InventoryItem[]> = {}
+    const ungrouped: InventoryItem[] = []
+
+    Array.from(inventory.values()).forEach(item => {
+      const loc = item.ingredient.storageLocation
+      if (loc) {
+        groups[loc] = [...(groups[loc] ?? []), item]
+      } else {
+        ungrouped.push(item)
+      }
+    })
+
+    return {
+      locatedGroups: Object.entries(groups).sort(([a], [b]) => a.localeCompare(b)),
+      ungrouped,
+    }
+  }, [inventory])
+
+  const renderItems = (items: InventoryItem[]) =>
+    items.map(item => (
+      <InventoryListItem
+        key={item.ingredient.id}
+        item={item}
+        onUpdate={onUpdateInventoryItem}
+        onRemove={onRemoveFromInventory}
+        onDelete={onDeleteIngredient}
+        onTogglePerishable={onTogglePerishable}
+      />
+    ))
 
   return (
-    <div className={"IngredientsList"}>
-      <div className={"IngredientsList-header"}>
+    <div className="IngredientsList">
+      <div className="IngredientsList-header">
         {RecipesStrings.INGREDIENTS_LIST_HEADER}
       </div>
       <Search
-        onItemClick={onAddIngredientClick}
+        onItemClick={onAddToInventory}
         getItems={NetworkService.getIngredients}
         inputPlaceholder={RecipesStrings.INGREDIENTS_SEARCH_INPUT_PLACEHOLDER}
       />
-      <button
-        className={"IngredientsList-updateButton"}
-        onClick={onIngredientsClearClick}
-        data-testid={'IngredientsList-ingredients--updateRecipes'}
-      >
-        {RecipesStrings.INGREDIENTS_CLEAR}
-      </button>
-      {ingredientsList}
+      {inventory.size > 0 && (
+        <div className="IngredientsList-ingredients">
+          {locatedGroups.map(([location, items]) => (
+            <div key={location} className="IngredientsList-group">
+              <div className="IngredientsList-group--header">{location}</div>
+              {renderItems(items)}
+            </div>
+          ))}
+          {ungrouped.length > 0 && (
+            <div className="IngredientsList-group">
+              {locatedGroups.length > 0 && (
+                <div className="IngredientsList-group--header">Inne</div>
+              )}
+              {renderItems(ungrouped)}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Ingredient, QuantifiedIngredient, Recipe, RecipeScores, Tag } from "./model";
+import { QuantifiedIngredient, Recipe, RecipeScores, Tag } from "./model";
 import { formatUnit } from "./formatUnit";
 import "./RecipesListItem.scss"
 import classNames from 'classnames';
@@ -7,10 +7,11 @@ import EditRecipeModal from "./EditRecipeModal";
 
 type RecipeListItemProps = {
   recipe: Recipe
-  ingredients: Set<Ingredient>
+  ingredients: Set<string>
   allTags: Tag[]
   scores?: RecipeScores
   selected: boolean
+  hasUnitMismatch: boolean
   onRemoveRecipeClick: () => void
   onSelectClick: () => void
   onRecipeEdited: (updatedRecipe: Recipe) => void
@@ -22,6 +23,7 @@ const RecipesListItem = ({
                            allTags,
                            scores,
                            selected,
+                           hasUnitMismatch,
                            onRemoveRecipeClick,
                            onSelectClick,
                            onRecipeEdited,
@@ -38,10 +40,8 @@ const RecipesListItem = ({
     .map(ingredient => getIngredientString(ingredient))
     .join(", ");
 
-  const ingredientsNames = new Set(Array.from(ingredients).map(i => i.name))
-
   const matchedIngredients = quantifiedIngredients
-    .filter(ingredient => ingredientsNames.has(ingredient.ingredient.name))
+    .filter(ingredient => ingredients.has(ingredient.ingredient.name))
 
   const ingredientsCompleteness = matchedIngredients.length / quantifiedIngredients.length;
 
@@ -59,10 +59,6 @@ const RecipesListItem = ({
     if (confirm(`Na pewno chcesz usunąć przepis ${name}?`)) {
       onRemoveRecipeClick()
     }
-  }
-
-  const onselectButtonClick = () => {
-    onSelectClick()
   }
 
   const wrapperClassNames = classNames(
@@ -87,11 +83,17 @@ const RecipesListItem = ({
           </div>
         )}
         <div className={"RecipesListItem-header--icons"}>
+          {hasUnitMismatch && (
+            <i
+              className="gg-danger RecipesListItem-header--icons--mismatch"
+              title="Niezgodność jednostek w inwentarzu"
+            />
+          )}
           <div className={"RecipesListItem-header--icons--pen"} onClick={() => setIsEditModalOpen(true)}>
             <i className="gg-pen"/>
           </div>
           <i className="gg-close-r" onClick={onRemoveClick}/>
-          <i className="gg-arrow-right-o" onClick={onselectButtonClick}/>
+          <i className="gg-arrow-right-o" onClick={onSelectClick}/>
         </div>
       </div>
       {scores && (
@@ -115,7 +117,7 @@ const RecipesListItem = ({
         </div>
       )}
       <div className={"RecipesListItem-ingredients"}>
-        {`${ingredientsString} (${matchedIngredients.length}/${quantifiedIngredients.length})`}
+        {ingredientsString}
       </div>
       {isEditModalOpen && (
         <EditRecipeModal

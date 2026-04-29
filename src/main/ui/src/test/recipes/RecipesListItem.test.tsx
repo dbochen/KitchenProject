@@ -9,37 +9,31 @@ describe("RecipesListItem", () => {
       name: "Recipe",
       source: "Source",
       timeInMinutes: 10,
+      categoryServings: {},
+      balanceSum: 0,
+      inflammationSum: 0,
+      tags: [],
       quantifiedIngredients: [
-        {
-          ingredient: {
-            name: "Ingredient 1",
-            id: 1,
-          },
-          unit: "LITER",
-          quantity: 1
-        },
-        {
-          ingredient: {
-            name: "Ingredient 2",
-            id: 2,
-          },
-          unit: "TEA_SPOON",
-          quantity: 3
-        },
-        {
-          ingredient: {
-            name: "Ingredient 3",
-            id: 3,
-          },
-          unit: "CUP",
-          quantity: 0.5
-        }
+        { ingredient: { name: "Ingredient 1", id: 1, vataBalance: "BALANCING" }, unit: "LITER", quantity: 1 },
+        { ingredient: { name: "Ingredient 2", id: 2, vataBalance: "BALANCING" }, unit: "TEA_SPOON", quantity: 3 },
+        { ingredient: { name: "Ingredient 3", id: 3, vataBalance: "BALANCING" }, unit: "CUP", quantity: 0.5 },
       ]
     };
-    const { findByText } = render(<RecipesListItem recipe={recipe} ingredients={new Set()}/>)
+    const { findByText } = render(
+      <RecipesListItem
+        recipe={recipe}
+        ingredients={new Set<string>()}
+        allTags={[]}
+        selected={false}
+        hasUnitMismatch={false}
+        onRemoveRecipeClick={jest.fn()}
+        onSelectClick={jest.fn()}
+        onRecipeEdited={jest.fn()}
+      />
+    )
 
     expect(await findByText("RECIPE")).toBeDefined()
     expect(await findByText("Source")).toBeDefined()
-    expect(await findByText("Ingredient 1 1 l, Ingredient 2 3 łyżeczki, Ingredient 3 0.5 szklanki")).toBeDefined()
+    expect(await findByText("Ingredient 1 1 l, Ingredient 2 3 łyżeczki, Ingredient 3 0.5 szklanki (0/3)")).toBeDefined()
   })
 })

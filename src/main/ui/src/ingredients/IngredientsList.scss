@@ -3,9 +3,9 @@
   flex-direction: column;
   align-items: center;
   background-color: #eeeded;
-  width: 300px;
-  margin-right: 100px;
-  padding: 50px;
+  width: 380px;
+  margin-right: 60px;
+  padding: 40px 24px;
 
   &-header {
     font-weight: 700;
@@ -14,25 +14,111 @@
   }
 
   &-ingredients {
-    margin-top: 50px;
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     width: 100%;
 
     &--ingredient {
-      padding: 5px;
       display: flex;
       align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #d8d6d6;
       font-weight: 600;
 
+      &:last-child {
+        border-bottom: none;
+      }
+
       .gg-close-r {
-        margin-right: 10px;
+        flex-shrink: 0;
         color: #D95A40;
         cursor: pointer;
       }
 
+      .gg-trash {
+        flex-shrink: 0;
+        color: #999;
+        cursor: pointer;
 
+        &:hover {
+          color: #D95A40;
+        }
+      }
+
+      .IngredientsList-ingredients--flag {
+        flex-shrink: 0;
+        color: #ccc;
+        cursor: pointer;
+
+        &:hover {
+          color: #D95A40;
+        }
+
+        &-active {
+          color: #D95A40;
+        }
+      }
+    }
+
+    &--name {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 14px;
+    }
+
+    &--quantity {
+      width: 58px;
+      flex-shrink: 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 4px 6px;
+      font-size: 13px;
+      font-family: inherit;
+      text-align: right;
+      background: #fff;
+
+      &:focus {
+        outline: none;
+        border-color: #D95A40;
+      }
+    }
+
+    &--unit {
+      width: 82px;
+      flex-shrink: 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 4px 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: #D95A40;
+      }
+    }
+  }
+
+  &-group {
+    width: 100%;
+    margin-top: 12px;
+
+    &--header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #999;
+      padding-bottom: 4px;
+      border-bottom: 2px solid #d8d6d6;
+      margin-bottom: 2px;
     }
   }
 

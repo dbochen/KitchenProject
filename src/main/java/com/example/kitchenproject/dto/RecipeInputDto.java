@@ -17,6 +17,7 @@ public class RecipeInputDto {
     @NotEmpty(message = "Recipe without ingredients?!")
     private List<QuantifiedIngredientInputDto> ingredients;
     private String source;
+    private List<Integer> tagIds;
 
     public Recipe toRecipe() {
         return Recipe.builder()
@@ -26,6 +27,5 @@ public class RecipeInputDto {
                         .collect(Collectors.toList()))
                 .source(source)
                 .build();
-
     }
 }

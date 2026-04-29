@@ -4,7 +4,6 @@ import com.example.kitchenproject.dto.RecipeInputDto;
 import com.example.kitchenproject.dto.UpdateRecipeDto;
 import com.example.kitchenproject.dto.RecipeOutputDto;
 import com.example.kitchenproject.model.Category;
-import com.example.kitchenproject.model.Recipe;
 import com.example.kitchenproject.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -37,7 +36,7 @@ public class RecipeController {
     }
 
     @PostMapping("/recipes")
-    public Recipe addRecipe (@Valid @RequestBody RecipeInputDto recipeDto){
+    public RecipeOutputDto addRecipe(@Valid @RequestBody RecipeInputDto recipeDto) {
         return recipeService.save(recipeDto);
     }
 

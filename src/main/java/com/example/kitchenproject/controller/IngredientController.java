@@ -11,6 +11,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 import static com.example.kitchenproject.config.Config.UI_ORIGIN;
 
 @RestController
@@ -35,6 +40,11 @@ public class IngredientController {
     @PostMapping("/ingredients")
     public Ingredient addIngredient(@Valid @RequestBody IngredientInputDto ingredientDto){
         return ingredientService.save(ingredientDto);
+    }
 
+    @DeleteMapping("/ingredients/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteIngredient(@PathVariable int id) {
+        ingredientService.delete(id);
     }
 }

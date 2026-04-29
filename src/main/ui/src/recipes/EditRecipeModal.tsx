@@ -6,20 +6,24 @@ import { NetworkService } from "../NetworkService";
 import "./EditRecipeModal.scss";
 
 type EditRecipeModalProps = {
-  recipe: Recipe;
+  recipe?: Recipe;
   allTags: Tag[];
   onClose: () => void;
-  onSaved: (updatedRecipe: Recipe) => void;
+  onSaved: (recipe: Recipe) => void;
 };
 
 const EditRecipeModal = ({ recipe, allTags, onClose, onSaved }: EditRecipeModalProps): JSX.Element => {
-  const [name, setName] = useState<string>(recipe.name);
-  const [ingredients, setIngredients] = useState<QuantifiedIngredient[]>(recipe.quantifiedIngredients);
+  const isAddMode = recipe === undefined;
+
+  const [name, setName] = useState<string>(recipe?.name ?? "");
+  const [source, setSource] = useState<string>(recipe?.source ?? "");
+  const [ingredients, setIngredients] = useState<QuantifiedIngredient[]>(recipe?.quantifiedIngredients ?? []);
   const [selectedTagIds, setSelectedTagIds] = useState<Set<number>>(
-    new Set(allTags.filter(t => recipe.tags?.includes(t.name)).map(t => t.id))
+    new Set(recipe ? allTags.filter(t => recipe.tags?.includes(t.name)).map(t => t.id) : [])
   );
 
   const onNameChange: ChangeEventHandler<HTMLInputElement> = (e) => setName(e.target.value);
+  const onSourceChange: ChangeEventHandler<HTMLInputElement> = (e) => setSource(e.target.value);
 
   const onRemoveIngredient = (qi: QuantifiedIngredient) => {
     setIngredients(ingredients.filter(i => i.ingredient.id !== qi.ingredient.id));
@@ -50,21 +54,22 @@ const EditRecipeModal = ({ recipe, allTags, onClose, onSaved }: EditRecipeModalP
   };
 
   const onSave = () => {
-    NetworkService.updateRecipe(
-      recipe.id,
-      name,
-      ingredients.map((qi) => ({
-        id: qi.ingredient.id,
-        quantity: qi.quantity,
-        unit: qi.unit,
-      })),
-      Array.from(selectedTagIds)
-    )
-      .then((updatedRecipe) => {
-        onSaved(updatedRecipe);
-        onClose();
-      })
-      .catch(() => alert("Wywaliło się :("));
+    const tagIds = Array.from(selectedTagIds);
+    const mappedIngredients = ingredients.map(qi => ({
+      id: qi.ingredient.id,
+      quantity: qi.quantity,
+      unit: qi.unit,
+    }));
+
+    if (!recipe) {
+      NetworkService.addRecipe({ name, source, ingredients: mappedIngredients, tagIds })
+        .then(newRecipe => { onSaved(newRecipe); onClose(); })
+        .catch(() => alert("Wywaliło się :("));
+    } else {
+      NetworkService.updateRecipe(recipe.id, name, mappedIngredients, tagIds)
+        .then(updatedRecipe => { onSaved(updatedRecipe); onClose(); })
+        .catch(() => alert("Wywaliło się :("));
+    }
   };
 
   return (
@@ -74,10 +79,19 @@ const EditRecipeModal = ({ recipe, allTags, onClose, onSaved }: EditRecipeModalP
           <input
             className="EditRecipeModal-header--nameInput"
             value={name}
+            placeholder="Nazwa przepisu"
             onChange={onNameChange}
           />
           <i className="gg-close-r" onClick={onClose} />
         </div>
+        {isAddMode && (
+          <input
+            className="EditRecipeModal-sourceInput"
+            value={source}
+            placeholder="Źródło przepisu"
+            onChange={onSourceChange}
+          />
+        )}
         <div className="EditRecipeModal-ingredients">
           {ingredients.map((qi) => (
             <div className="EditRecipeModal-ingredients--ingredient" key={qi.ingredient.id}>
@@ -118,7 +132,9 @@ const EditRecipeModal = ({ recipe, allTags, onClose, onSaved }: EditRecipeModalP
           </div>
         )}
         <div className="EditRecipeModal-actions">
-          <button className="EditRecipeModal-actions--save" onClick={onSave}>Zapisz</button>
+          <button className="EditRecipeModal-actions--save" onClick={onSave}>
+            {isAddMode ? "Dodaj" : "Zapisz"}
+          </button>
           <button className="EditRecipeModal-actions--cancel" onClick={onClose}>Anuluj</button>
         </div>
       </div>

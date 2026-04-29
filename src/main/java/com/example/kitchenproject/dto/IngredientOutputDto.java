@@ -12,4 +12,5 @@ public class IngredientOutputDto {
     private String name;
     private Balance vataBalance;
     private Inflammation inflammation;
+    private String storageLocation;
 }

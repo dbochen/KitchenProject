@@ -2,11 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react'
 import './App.scss'
 import RecipesList from "./recipes/RecipesList";
 import IngredientsList from "./ingredients/IngredientsList";
-import { categoryToDailyServings, Ingredient, Recipe, RecipeScores, Tag } from "./recipes/model";
+import {
+  categoryToDailyServings, Ingredient, InventoryItem,
+  QUANTITY_UNITS, QuantityUnit, Recipe, RecipeScores, Tag
+} from "./recipes/model";
 import { NetworkService, Sort } from "./NetworkService";
-import AddRecipe from "./recipes/AddRecipe";
+import EditRecipeModal from "./recipes/EditRecipeModal";
 import { AddTag } from "./tags/AddTag";
 import { Menu } from "./menu/Menu";
+import ShoppingList from "./ingredients/ShoppingList";
 import { SortStrategy } from "./recipes/SortStrategyPicker";
 import * as _ from "lodash";
 
@@ -34,9 +38,13 @@ const sortRecipes = (
   chosenIngredientsNames: Set<string>,
   categoryDeficiencies: Record<string, number>,
   randomSortKeys: Map<number, number>,
+  perishableIngredientNames: Set<string>,
 ): Recipe[] => {
+  const perishableBonus = (recipe: Recipe) =>
+    recipe.quantifiedIngredients.filter(qi => perishableIngredientNames.has(qi.ingredient.name)).length * 5;
+
   if (strategy === "random") {
-    return _.sortBy(recipesInput, (r: Recipe) => randomSortKeys.get(r.id) ?? 0);
+    return _.sortBy(recipesInput, (r: Recipe) => (randomSortKeys.get(r.id) ?? 0) - perishableBonus(r));
   }
 
   const balanceAvgs = recipesInput.map(avgBalance);
@@ -60,30 +68,33 @@ const sortRecipes = (
     const servingsNorm = normalize(gregersMap.get(recipe.id) ?? 0, 0, maxGregers);
 
     const standardScore = matchedRatio + balanceNorm - inflammationNorm + servingsNorm;
-    if (strategy === "ingredients") return -(matchedRatio * 1000 + standardScore);
-    if (strategy === "balance") return -(balanceNorm * 1000 + standardScore);
-    if (strategy === "inflammation") return inflammationNorm * 1000 - standardScore;
-    if (strategy === "servings") return -(servingsNorm * 1000 + standardScore);
-    return -standardScore;
+    const urgent = perishableBonus(recipe);
+    if (strategy === "ingredients") return -(matchedRatio * 1000 + standardScore + urgent);
+    if (strategy === "balance") return -(balanceNorm * 1000 + standardScore + urgent);
+    if (strategy === "inflammation") return inflammationNorm * 1000 - standardScore - urgent;
+    if (strategy === "servings") return -(servingsNorm * 1000 + standardScore + urgent);
+    return -(standardScore + urgent);
   });
 };
 
+const INVENTORY_STORAGE_KEY = "kitchenApp.inventory"
+
+const getInventoryFromStorage = (): Map<number, InventoryItem> => {
+  const saved = localStorage.getItem(INVENTORY_STORAGE_KEY)
+  if (!saved) return new Map()
+  return new Map(JSON.parse(saved))
+}
+
 const App = (): JSX.Element => {
 
-  const INGREDIENTS_STORAGE_KEY = "kitchenApp.chosenIngredients"
-
-  const getIngredientsFromStorage = (): Set<Ingredient> => {
-    const savedIngredients = localStorage.getItem(INGREDIENTS_STORAGE_KEY)
-    return savedIngredients ? new Set(JSON.parse(savedIngredients)) : new Set()
-  }
-
   const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [chosenIngredients, setChosenIngredients] = useState<Set<Ingredient>>(getIngredientsFromStorage());
+  const [inventory, setInventory] = useState<Map<number, InventoryItem>>(getInventoryFromStorage)
   const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [selectedTagIds, setSelectedTagIds] = useState<Set<number>>(new Set())
   const [sortStrategy, setSortStrategy] = useState<SortStrategy>("standard")
   const [randomSortKeys, setRandomSortKeys] = useState<Map<number, number>>(new Map())
+  const [showAddModal, setShowAddModal] = useState(false)
 
   useEffect(() => {
     fetchRecipes({ type: "ingredients", ingredients: "" })
@@ -91,9 +102,8 @@ const App = (): JSX.Element => {
   }, [])
 
   useEffect(() => {
-    const chosenIngredientsAsString = JSON.stringify(Array.from(chosenIngredients))
-    localStorage.setItem(INGREDIENTS_STORAGE_KEY, chosenIngredientsAsString)
-  }, [chosenIngredients])
+    localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(Array.from(inventory.entries())))
+  }, [inventory])
 
   useEffect(() => {
     setRandomSortKeys(prev => {
@@ -115,10 +125,67 @@ const App = (): JSX.Element => {
     setRecipes(recipesResponse)
   }
 
-  const chosenIngredientsNames = useMemo(
-    () => new Set(Array.from(chosenIngredients).map(ci => ci.name)),
-    [chosenIngredients]
-  );
+  const projectedInventory = useMemo(() => {
+    const projected = new Map<number, number>()
+    inventory.forEach((item, id) => projected.set(id, item.quantity))
+    selectedRecipes.forEach(recipe => {
+      recipe.quantifiedIngredients.forEach(qi => {
+        const inv = inventory.get(qi.ingredient.id)
+        if (inv && inv.unit === qi.unit) {
+          projected.set(qi.ingredient.id, (projected.get(qi.ingredient.id) ?? 0) - qi.quantity)
+        }
+      })
+    })
+    return projected
+  }, [inventory, selectedRecipes])
+
+  const chosenIngredientsNames = useMemo(() => {
+    const names = new Set<string>()
+    inventory.forEach(item => {
+      if ((projectedInventory.get(item.ingredient.id) ?? 0) > 0) {
+        names.add(item.ingredient.name)
+      }
+    })
+    return names
+  }, [inventory, projectedInventory])
+
+  const recipesWithMismatch = useMemo(() => {
+    const result = new Set<number>()
+    recipes.forEach(recipe => {
+      const hasMismatch = recipe.quantifiedIngredients.some(qi => {
+        const inv = inventory.get(qi.ingredient.id)
+        return inv && inv.unit !== qi.unit
+      })
+      if (hasMismatch) result.add(recipe.id)
+    })
+    return result
+  }, [recipes, inventory])
+
+  const shoppingListDeficits = useMemo(() => {
+    const deficits: { ingredient: Ingredient, deficit: number, unit: QuantityUnit }[] = []
+    projectedInventory.forEach((projected, id) => {
+      if (projected < 0) {
+        const item = inventory.get(id)
+        if (item) deficits.push({ ingredient: item.ingredient, deficit: -projected, unit: item.unit })
+      }
+    })
+    return deficits
+  }, [projectedInventory, inventory])
+
+  const shoppingListMismatches = useMemo(() => {
+    const seen = new Set<number>()
+    const mismatches: { ingredient: Ingredient, inventoryUnit: QuantityUnit, recipeUnit: QuantityUnit }[] = []
+    selectedRecipes.forEach(recipe => {
+      recipe.quantifiedIngredients.forEach(qi => {
+        const inv = inventory.get(qi.ingredient.id)
+        if (inv && inv.unit !== qi.unit && !seen.has(qi.ingredient.id)) {
+          seen.add(qi.ingredient.id)
+          mismatches.push({ ingredient: qi.ingredient, inventoryUnit: inv.unit, recipeUnit: qi.unit })
+        }
+      })
+    })
+    return mismatches
+  }, [selectedRecipes, inventory])
 
   const getCategoryToSelectedServings = () => {
     const categoryToSelectedServings: { [key: string]: number } = {};
@@ -158,9 +225,20 @@ const App = (): JSX.Element => {
     );
   }, [selectedRecipes]);
 
+  const perishableIngredientNames = useMemo(() => {
+    const names = new Set<string>()
+    inventory.forEach(item => {
+      if (item.perishable && (projectedInventory.get(item.ingredient.id) ?? 0) > 0)
+        names.add(item.ingredient.name)
+    })
+    return names
+  }, [inventory, projectedInventory])
+
   const sortedRecipes = useMemo(
-    () => sortRecipes(recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies, randomSortKeys),
-    [recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies, randomSortKeys]
+    () => sortRecipes(
+      recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies, randomSortKeys, perishableIngredientNames
+    ),
+    [recipes, sortStrategy, chosenIngredientsNames, categoryDeficiencies, randomSortKeys, perishableIngredientNames]
   );
 
   const recipeScores = useMemo((): Map<number, RecipeScores> => {
@@ -195,20 +273,47 @@ const App = (): JSX.Element => {
     ]));
   }, [recipes, chosenIngredientsNames, categoryDeficiencies]);
 
-  const onAddIngredientClick = (ingredient: Ingredient) => {
-    const newIngredients = new Set(chosenIngredients)
-    newIngredients.add(ingredient)
-    setChosenIngredients(newIngredients)
+  const onAddToInventory = (ingredient: Ingredient) => {
+    if (!inventory.has(ingredient.id)) {
+      const next = new Map(inventory)
+      next.set(ingredient.id, { ingredient, quantity: 0, unit: QUANTITY_UNITS[0] })
+      setInventory(next)
+    }
   }
 
-  const onRemoveIngredientClick = (ingredient: Ingredient): void => {
-    const newIngredients = new Set(chosenIngredients)
-    newIngredients.delete(ingredient)
-    setChosenIngredients(newIngredients)
+  const onRemoveFromInventory = (ingredient: Ingredient) => {
+    const next = new Map(inventory)
+    next.delete(ingredient.id)
+    setInventory(next)
   }
 
-  const onIngredientsClearClick = (): void => {
-    setChosenIngredients(new Set())
+  const onUpdateInventoryItem = (ingredientId: number, quantity: number, unit: QuantityUnit) => {
+    const item = inventory.get(ingredientId)
+    if (!item) return
+    const next = new Map(inventory)
+    next.set(ingredientId, { ...item, quantity, unit })
+    setInventory(next)
+  }
+
+  const onTogglePerishable = (ingredient: Ingredient) => {
+    const item = inventory.get(ingredient.id)
+    if (!item) return
+    const next = new Map(inventory)
+    next.set(ingredient.id, { ...item, perishable: !item.perishable })
+    setInventory(next)
+  }
+
+  const onDeleteIngredient = (ingredient: Ingredient) => {
+    NetworkService.deleteIngredient(ingredient.id)
+      .then(() => onRemoveFromInventory(ingredient))
+      .catch((error: any) => {
+        if (error.response?.status === 409) {
+          const count: number = error.response.data.recipeCount
+          alert(`Ten składnik jest używany w ${count} ${count === 1 ? 'przepisie' : 'przepisach'}.`)
+        } else {
+          alert("Wywaliło się :(")
+        }
+      })
   }
 
   const onRemoveRecipeClick = (recipe: Recipe) => {
@@ -232,9 +337,21 @@ const App = (): JSX.Element => {
       newSelectedRecipes.splice(index, 1)
       setSelectedRecipes(newSelectedRecipes)
     } else {
-      const newSelectedRecipes = [...selectedRecipes]
-      newSelectedRecipes.push(recipe)
-      setSelectedRecipes(newSelectedRecipes)
+      const mismatches = recipe.quantifiedIngredients.filter(qi => {
+        const inv = inventory.get(qi.ingredient.id)
+        return inv && inv.unit !== qi.unit
+      })
+      if (mismatches.length > 0) {
+        const mismatchText = mismatches
+          .map(qi => {
+            const inv = inventory.get(qi.ingredient.id)
+            return inv ? `${qi.ingredient.name}: inwentarz ${inv.unit}, przepis ${qi.unit}` : null
+          })
+          .filter(Boolean)
+          .join('\n')
+        if (!confirm(`Niezgodność jednostek:\n${mismatchText}\n\nDodać przepis mimo to?`)) return
+      }
+      setSelectedRecipes([...selectedRecipes, recipe])
     }
   }
 
@@ -256,17 +373,21 @@ const App = (): JSX.Element => {
   return (
     <div className="App">
       <IngredientsList
-        ingredients={chosenIngredients}
-        onAddIngredientClick={onAddIngredientClick}
-        onRemoveIngredientClick={onRemoveIngredientClick}
-        onIngredientsClearClick={onIngredientsClearClick}
+        inventory={inventory}
+        onAddToInventory={onAddToInventory}
+        onRemoveFromInventory={onRemoveFromInventory}
+        onUpdateInventoryItem={onUpdateInventoryItem}
+        onDeleteIngredient={onDeleteIngredient}
+        onTogglePerishable={onTogglePerishable}
       />
       <RecipesList
         recipes={filteredRecipes}
-        ingredients={chosenIngredients}
+        ingredients={chosenIngredientsNames}
+        inventoryIngredientNames={new Set(Array.from(inventory.values()).map(item => item.ingredient.name))}
         allTags={allTags}
         selectedTagIds={selectedTagIds}
         selectedRecipeIds={new Set(selectedRecipes.map(r => r.id))}
+        recipesWithMismatch={recipesWithMismatch}
         sortStrategy={sortStrategy}
         recipeScores={recipeScores}
         onTagToggle={onTagToggle}
@@ -276,19 +397,28 @@ const App = (): JSX.Element => {
           }
           setSortStrategy(strategy)
         }}
-        onAddIngredientClick={onAddIngredientClick}
+        onAddToInventory={onAddToInventory}
         onRemoveRecipeClick={onRemoveRecipeClick}
         onSelectRecipeClick={onSelectRecipeClick}
         onRecipeEdited={onRecipeEdited}
       />
-      <div>
-        <AddRecipe/>
+      <div className="RightPanel">
+        <button className="RightPanel-addRecipeBtn" onClick={() => setShowAddModal(true)}>
+          + Dodaj przepis
+        </button>
         <AddTag/>
         <Menu categories={sortedCategoriesAndServings}/>
+        <ShoppingList deficits={shoppingListDeficits} mismatches={shoppingListMismatches}/>
+        {showAddModal && (
+          <EditRecipeModal
+            allTags={allTags}
+            onClose={() => setShowAddModal(false)}
+            onSaved={(recipe) => setRecipes(prev => [...prev, recipe])}
+          />
+        )}
       </div>
     </div>
   )
 }
-
 
 export default App

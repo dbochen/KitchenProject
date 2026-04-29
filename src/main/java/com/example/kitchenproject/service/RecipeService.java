@@ -87,8 +87,14 @@ public class RecipeService {
         return sortedByIngredients;
     }
 
-    public Recipe save(RecipeInputDto recipeDto) {
-        return recipeRepository.save(recipeDto.toRecipe());
+    public RecipeOutputDto save(RecipeInputDto recipeDto) {
+        Recipe recipe = recipeDto.toRecipe();
+        if (recipeDto.getTagIds() != null && !recipeDto.getTagIds().isEmpty()) {
+            recipe.setTags(recipeDto.getTagIds().stream()
+                    .map(tagId -> Tag.builder().id(tagId).build())
+                    .collect(toSet()));
+        }
+        return recipeRepository.save(recipe).toRecipeOutputDto();
     }
 
     public void removeRecipe(Integer id) {

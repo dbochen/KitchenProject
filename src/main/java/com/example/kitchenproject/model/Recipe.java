@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,12 +26,13 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuantifiedIngredient> quantifiedIngredients;
     private String source;
     private int timeInMinutes;
     @ManyToMany
-    private Set<Tag> tags;
+    @Builder.Default
+    private Set<Tag> tags = new HashSet<>();
 
     public RecipeOutputDto toRecipeOutputDto() {
         return RecipeOutputDto.builder()

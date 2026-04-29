@@ -29,6 +29,8 @@ public class Ingredient {
     private Balance vataBalance;
     @Column
     private Inflammation inflammation;
+    @Column
+    private String storageLocation;
 
     public IngredientOutputDto toOutputDto() {
         return IngredientOutputDto.builder()
@@ -36,6 +38,7 @@ public class Ingredient {
                 .name(name)
                 .vataBalance(vataBalance)
                 .inflammation(inflammation)
+                .storageLocation(storageLocation)
                 .build();
     }
 }
