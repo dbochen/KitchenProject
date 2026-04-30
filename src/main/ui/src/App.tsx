@@ -42,7 +42,10 @@ const sortRecipes = (
   perishableIngredientNames: Set<string>,
 ): Recipe[] => {
   const perishableBonus = (recipe: Recipe) =>
-    recipe.quantifiedIngredients.filter(qi => perishableIngredientNames.has(qi.ingredient.name)).length * 5;
+    recipe.quantifiedIngredients.filter(qi =>
+      perishableIngredientNames.has(qi.ingredient.name) ||
+      qi.substitutes.some(s => perishableIngredientNames.has(s.name))
+    ).length * 5;
 
   if (strategy === "random") {
     return _.sortBy(recipesInput, (r: Recipe) => (randomSortKeys.get(r.id) ?? 0) - perishableBonus(r));
@@ -61,8 +64,10 @@ const sortRecipes = (
 
   return _.sortBy(recipesInput, (recipe: Recipe) => {
     const matchedRatio = recipe.quantifiedIngredients.length > 0
-      ? recipe.quantifiedIngredients.filter(qi => chosenIngredientsNames.has(qi.ingredient.name)).length
-        / recipe.quantifiedIngredients.length
+      ? recipe.quantifiedIngredients.filter(qi =>
+          chosenIngredientsNames.has(qi.ingredient.name) ||
+          qi.substitutes.some(s => chosenIngredientsNames.has(s.name))
+        ).length / recipe.quantifiedIngredients.length
       : 0;
     const balanceNorm = normalize(avgBalance(recipe), minBalance, maxBalance);
     const inflammationNorm = normalize(avgInflammation(recipe), minInflammation, maxInflammation);
@@ -131,11 +136,16 @@ const App = (): JSX.Element => {
     inventory.forEach((item, id) => projected.set(id, item.quantity))
     selectedRecipes.forEach(recipe => {
       recipe.quantifiedIngredients.forEach(qi => {
-        const inv = inventory.get(qi.ingredient.id)
-        if (inv) {
+        const candidates = [qi.ingredient, ...qi.substitutes]
+        for (const candidate of candidates) {
+          const inv = inventory.get(candidate.id)
+          if (!inv) continue
           const converted = convertToUnit(qi.quantity, qi.unit, inv.unit)
-          if (converted !== null) {
-            projected.set(qi.ingredient.id, (projected.get(qi.ingredient.id) ?? 0) - converted)
+          if (converted === null) continue
+          const current = projected.get(candidate.id) ?? 0
+          if (candidate.id === qi.ingredient.id || current > 0) {
+            projected.set(candidate.id, current - converted)
+            break
           }
         }
       })

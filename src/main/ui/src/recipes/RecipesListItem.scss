@@ -111,6 +111,12 @@
     padding: 15px;
   }
 
+  &-missing {
+    padding: 0 15px 6px;
+    font-size: 11px;
+    color: #D95A40;
+  }
+
   &-categoryServings {
     padding: 0 15px 10px;
     font-size: 11px;

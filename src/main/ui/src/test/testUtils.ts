@@ -5,7 +5,8 @@ export const getRecipe = (name: string, ingredientsNames: string[] = []): Recipe
   quantifiedIngredients: ingredientsNames.map(ingredientName => ({
     ingredient: getIngredient(ingredientName),
     quantity: 1,
-    unit: "PIECE"
+    unit: "PIECE",
+    substitutes: [],
   })),
   source: "source",
   timeInMinutes: 1,
