@@ -10,9 +10,12 @@ interface Props<T extends SearchItem> {
   onItemClick: (item: T) => void;
   getItems: (query: string, limit: number) => Promise<T[]>
   inputPlaceholder: string;
+  autoFocus?: boolean;
 }
 
-export const Search = <T extends SearchItem,>({ onItemClick, getItems, inputPlaceholder }: Props<T>): JSX.Element => {
+export const Search = <T extends SearchItem,>(
+  { onItemClick, getItems, inputPlaceholder, autoFocus }: Props<T>
+): JSX.Element => {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -49,6 +52,7 @@ export const Search = <T extends SearchItem,>({ onItemClick, getItems, inputPlac
         onChange={onQueryChange}
         value={searchQuery}
         ref={inputRef}
+        autoFocus={autoFocus}
       />
       {searchQuery !== "" &&
         <div className={"Search-searchResults"}>

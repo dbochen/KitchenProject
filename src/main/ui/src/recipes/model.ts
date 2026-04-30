@@ -26,7 +26,8 @@ export type Tag = {
 export type QuantifiedIngredient = {
   ingredient: Ingredient,
   quantity: number,
-  unit: QuantityUnit
+  unit: QuantityUnit,
+  substitutes: Ingredient[],
 }
 
 export type Ingredient = {

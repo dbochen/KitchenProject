@@ -26,7 +26,7 @@ export interface NetworkServiceProvider {
   deleteIngredient: (id: number) => Promise<void>
   updateRecipe: (
     id: number, name: string,
-    ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>,
+    ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit, substituteIds: number[] }>,
     tagIds: number[]
   ) => Promise<Recipe>
 }
@@ -36,7 +36,8 @@ interface AddRecipeRequest {
   ingredients: Array<{
     id: number,
     quantity: number,
-    unit: QuantityUnit
+    unit: QuantityUnit,
+    substituteIds: number[]
   }>,
   source?: string,
   tagIds?: number[]
@@ -67,7 +68,7 @@ export const NetworkService: NetworkServiceProvider = {
   deleteIngredient: async (id: number): Promise<void> => axiosInstance.delete(`/ingredients/${id}`),
   updateRecipe: async (
     id: number, name: string,
-    ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit }>,
+    ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit, substituteIds: number[] }>,
     tagIds: number[]
   ): Promise<Recipe> =>
     (await axiosInstance.patch(`/recipes/${id}/ingredients`, { name, ingredients, tagIds })).data,

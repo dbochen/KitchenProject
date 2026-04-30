@@ -21,6 +21,7 @@ const EditRecipeModal = ({ recipe, allTags, onClose, onSaved }: EditRecipeModalP
   const [selectedTagIds, setSelectedTagIds] = useState<Set<number>>(
     new Set(recipe ? allTags.filter(t => recipe.tags?.includes(t.name)).map(t => t.id) : [])
   );
+  const [substitutingForId, setSubstitutingForId] = useState<number | null>(null);
 
   const onNameChange: ChangeEventHandler<HTMLInputElement> = (e) => setName(e.target.value);
   const onSourceChange: ChangeEventHandler<HTMLInputElement> = (e) => setSource(e.target.value);
@@ -43,8 +44,27 @@ const EditRecipeModal = ({ recipe, allTags, onClose, onSaved }: EditRecipeModalP
 
   const onAddIngredient = (ingredient: Ingredient) => {
     if (!ingredients.find(i => i.ingredient.id === ingredient.id)) {
-      setIngredients([...ingredients, { ingredient, quantity: 0, unit: QUANTITY_UNITS[0] }]);
+      setIngredients([...ingredients, { ingredient, quantity: 0, unit: QUANTITY_UNITS[0], substitutes: [] }]);
     }
+  };
+
+  const onAddSubstitute = (qi: QuantifiedIngredient, substitute: Ingredient) => {
+    if (substitute.id === qi.ingredient.id) return;
+    if (qi.substitutes.find(s => s.id === substitute.id)) return;
+    setIngredients(ingredients.map(i =>
+      i.ingredient.id === qi.ingredient.id
+        ? { ...i, substitutes: [...i.substitutes, substitute] }
+        : i
+    ));
+    setSubstitutingForId(null);
+  };
+
+  const onRemoveSubstitute = (qi: QuantifiedIngredient, substituteId: number) => {
+    setIngredients(ingredients.map(i =>
+      i.ingredient.id === qi.ingredient.id
+        ? { ...i, substitutes: i.substitutes.filter(s => s.id !== substituteId) }
+        : i
+    ));
   };
 
   const onTagToggle = (tag: Tag) => {
@@ -59,6 +79,7 @@ const EditRecipeModal = ({ recipe, allTags, onClose, onSaved }: EditRecipeModalP
       id: qi.ingredient.id,
       quantity: qi.quantity,
       unit: qi.unit,
+      substituteIds: qi.substitutes.map(s => s.id),
     }));
 
     if (!recipe) {
@@ -94,20 +115,49 @@ const EditRecipeModal = ({ recipe, allTags, onClose, onSaved }: EditRecipeModalP
         )}
         <div className="EditRecipeModal-ingredients">
           {ingredients.map((qi) => (
-            <div className="EditRecipeModal-ingredients--ingredient" key={qi.ingredient.id}>
-              <i className="gg-close-r" onClick={() => onRemoveIngredient(qi)} />
-              <div className="EditRecipeModal-ingredients--name">{qi.ingredient.name}</div>
-              <input
-                type="number"
-                value={qi.quantity}
-                onChange={(e) => onQuantityChange(e, qi)}
-                onFocus={(e) => e.target.select()}
-              />
-              <select value={qi.unit} onChange={(e) => onUnitChange(e, qi)}>
-                {QUANTITY_UNITS.map((unit) => (
-                  <option value={unit} key={unit}>{formatUnit(qi.quantity, unit)}</option>
-                ))}
-              </select>
+            <div className="EditRecipeModal-ingredients--ingredientWrapper" key={qi.ingredient.id}>
+              <div className="EditRecipeModal-ingredients--ingredient">
+                <i className="gg-close-r" onClick={() => onRemoveIngredient(qi)} />
+                <div className="EditRecipeModal-ingredients--name">{qi.ingredient.name}</div>
+                <input
+                  type="number"
+                  value={qi.quantity}
+                  onChange={(e) => onQuantityChange(e, qi)}
+                  onFocus={(e) => e.target.select()}
+                />
+                <select value={qi.unit} onChange={(e) => onUnitChange(e, qi)}>
+                  {QUANTITY_UNITS.map((unit) => (
+                    <option value={unit} key={unit}>{formatUnit(qi.quantity, unit)}</option>
+                  ))}
+                </select>
+                <button
+                  className="EditRecipeModal-ingredients--addSubstituteBtn"
+                  onClick={() => setSubstitutingForId(
+                    substitutingForId === qi.ingredient.id ? null : qi.ingredient.id
+                  )}
+                  title="Dodaj zamiennik"
+                >
+                  ±
+                </button>
+              </div>
+              {qi.substitutes.length > 0 && (
+                <div className="EditRecipeModal-ingredients--substitutes">
+                  {qi.substitutes.map(s => (
+                    <span key={s.id} className="EditRecipeModal-ingredients--substitute">
+                      {s.name}
+                      <i className="gg-close-o" onClick={() => onRemoveSubstitute(qi, s.id)} />
+                    </span>
+                  ))}
+                </div>
+              )}
+              {substitutingForId === qi.ingredient.id && (
+                <Search
+                  onItemClick={(sub) => onAddSubstitute(qi, sub)}
+                  getItems={NetworkService.getIngredients}
+                  inputPlaceholder="Szukaj zamiennika..."
+                  autoFocus
+                />
+              )}
             </div>
           ))}
         </div>
