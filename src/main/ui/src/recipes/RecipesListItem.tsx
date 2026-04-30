@@ -56,6 +56,12 @@ const RecipesListItem = ({
   const matchedIngredients = quantifiedIngredients
     .filter(ingredient => ingredients.has(ingredient.ingredient.name))
 
+  const missingIngredients = quantifiedIngredients
+    .filter(qi =>
+      !ingredients.has(qi.ingredient.name) &&
+      !qi.substitutes.some(s => ingredients.has(s.name))
+    )
+
   const ingredientsCompleteness = matchedIngredients.length / quantifiedIngredients.length;
 
   const headerClassNames = classNames(
@@ -132,6 +138,11 @@ const RecipesListItem = ({
       <div className={"RecipesListItem-ingredients"}>
         {ingredientsString}
       </div>
+      {missingIngredients.length > 0 && (
+        <div className={"RecipesListItem-missing"}>
+          Brak: {missingIngredients.map(qi => qi.ingredient.name).join(", ")}
+        </div>
+      )}
       {Object.keys(recipe.categoryServings).length > 0 && (
         <div className={"RecipesListItem-categoryServings"}>
           {Object.entries(recipe.categoryServings)
