@@ -58,4 +58,5 @@ export const categoryToDailyServings: Record<string, number> = {
   "BERRIES": 1,
   "CRUCIFEROUS_VEGETABLES": 1,
   "FLAXSEED": 1,
+  "HERBS_AND_SPICES": 1,
 }

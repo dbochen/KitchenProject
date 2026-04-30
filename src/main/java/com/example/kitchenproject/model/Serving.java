@@ -17,6 +17,7 @@ public class Serving {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Enumerated(EnumType.STRING)
     private QuantityUnit unit;
     private double categoryServing;
 }

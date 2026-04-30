@@ -12,6 +12,7 @@ import { AddTag } from "./tags/AddTag";
 import { Menu } from "./menu/Menu";
 import ShoppingList from "./ingredients/ShoppingList";
 import { SortStrategy } from "./recipes/SortStrategyPicker";
+import { areCompatibleUnits, convertToUnit } from "./convertUnits";
 import * as _ from "lodash";
 
 const normalize = (value: number, min: number, max: number): number =>
@@ -131,8 +132,11 @@ const App = (): JSX.Element => {
     selectedRecipes.forEach(recipe => {
       recipe.quantifiedIngredients.forEach(qi => {
         const inv = inventory.get(qi.ingredient.id)
-        if (inv && inv.unit === qi.unit) {
-          projected.set(qi.ingredient.id, (projected.get(qi.ingredient.id) ?? 0) - qi.quantity)
+        if (inv) {
+          const converted = convertToUnit(qi.quantity, qi.unit, inv.unit)
+          if (converted !== null) {
+            projected.set(qi.ingredient.id, (projected.get(qi.ingredient.id) ?? 0) - converted)
+          }
         }
       })
     })
@@ -154,7 +158,7 @@ const App = (): JSX.Element => {
     recipes.forEach(recipe => {
       const hasMismatch = recipe.quantifiedIngredients.some(qi => {
         const inv = inventory.get(qi.ingredient.id)
-        return inv && inv.unit !== qi.unit
+        return inv && !areCompatibleUnits(inv.unit, qi.unit)
       })
       if (hasMismatch) result.add(recipe.id)
     })
@@ -178,7 +182,7 @@ const App = (): JSX.Element => {
     selectedRecipes.forEach(recipe => {
       recipe.quantifiedIngredients.forEach(qi => {
         const inv = inventory.get(qi.ingredient.id)
-        if (inv && inv.unit !== qi.unit && !seen.has(qi.ingredient.id)) {
+        if (inv && !areCompatibleUnits(inv.unit, qi.unit) && !seen.has(qi.ingredient.id)) {
           seen.add(qi.ingredient.id)
           mismatches.push({ ingredient: qi.ingredient, inventoryUnit: inv.unit, recipeUnit: qi.unit })
         }
@@ -339,7 +343,7 @@ const App = (): JSX.Element => {
     } else {
       const mismatches = recipe.quantifiedIngredients.filter(qi => {
         const inv = inventory.get(qi.ingredient.id)
-        return inv && inv.unit !== qi.unit
+        return inv && !areCompatibleUnits(inv.unit, qi.unit)
       })
       if (mismatches.length > 0) {
         const mismatchText = mismatches
@@ -374,6 +378,7 @@ const App = (): JSX.Element => {
     <div className="App">
       <IngredientsList
         inventory={inventory}
+        projectedInventory={projectedInventory}
         onAddToInventory={onAddToInventory}
         onRemoveFromInventory={onRemoveFromInventory}
         onUpdateInventoryItem={onUpdateInventoryItem}

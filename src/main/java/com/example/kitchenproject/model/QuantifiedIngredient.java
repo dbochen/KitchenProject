@@ -20,6 +20,7 @@ public class QuantifiedIngredient {
     @ManyToOne
     private Ingredient ingredient;
     private double quantity;
+    @Enumerated(EnumType.STRING)
     private QuantityUnit unit;
 
     public QuantifiedIngredientOutputDto toOutputDto() {

@@ -71,6 +71,17 @@
       font-size: 14px;
     }
 
+    &--projected {
+      font-size: 12px;
+      color: #999;
+      flex-shrink: 0;
+
+      &-negative {
+        color: #D95A40;
+        font-weight: 700;
+      }
+    }
+
     &--quantity {
       width: 58px;
       flex-shrink: 0;

@@ -114,7 +114,8 @@ public class RecipeService {
     public RecipeOutputDto updateRecipe(Integer id, UpdateRecipeDto dto) {
         var recipe = recipeRepository.findById(id).orElseThrow();
         recipe.setName(dto.getName());
-        recipe.setQuantifiedIngredients(dto.getIngredients().stream()
+        recipe.getQuantifiedIngredients().clear();
+        recipe.getQuantifiedIngredients().addAll(dto.getIngredients().stream()
                 .map(QuantifiedIngredientInputDto::toQuantifiedIngredient)
                 .collect(toList()));
         if (dto.getTagIds() != null) {

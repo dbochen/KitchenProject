@@ -21,13 +21,16 @@ public class Ingredient {
     @Column(unique = true)
     private String name;
     @Column
+    @Enumerated(EnumType.STRING)
     private Category category;
     @OneToMany
     @JoinColumn(name = "ingredient_id")
     private List<Serving> servings;
     @Column
+    @Enumerated(EnumType.STRING)
     private Balance vataBalance;
     @Column
+    @Enumerated(EnumType.STRING)
     private Inflammation inflammation;
     @Column
     private String storageLocation;

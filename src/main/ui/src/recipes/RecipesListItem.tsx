@@ -1,5 +1,18 @@
 import { QuantifiedIngredient, Recipe, RecipeScores, Tag } from "./model";
 import { formatUnit } from "./formatUnit";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  OTHER_VEGETABLES: "Inne warzywa",
+  NUTS_AND_SEEDS: "Orzechy i nasiona",
+  GREENS: "Zielone liście",
+  BEANS: "Strączki",
+  OTHER_FRUITS: "Inne owoce",
+  WHOLE_GRAINS: "Pełne ziarna",
+  BERRIES: "Jagody",
+  CRUCIFEROUS_VEGETABLES: "Warzywa krzyżowe",
+  FLAXSEED: "Siemię lniane",
+  HERBS_AND_SPICES: "Zioła i przyprawy"
+}
 import "./RecipesListItem.scss"
 import classNames from 'classnames';
 import { useState } from "react";
@@ -119,6 +132,13 @@ const RecipesListItem = ({
       <div className={"RecipesListItem-ingredients"}>
         {ingredientsString}
       </div>
+      {Object.keys(recipe.categoryServings).length > 0 && (
+        <div className={"RecipesListItem-categoryServings"}>
+          {Object.entries(recipe.categoryServings)
+            .map(([cat, val]) => `${CATEGORY_LABELS[cat] ?? cat}: ${Math.round(val * 10) / 10}`)
+            .join(" · ")}
+        </div>
+      )}
       {isEditModalOpen && (
         <EditRecipeModal
           recipe={recipe}

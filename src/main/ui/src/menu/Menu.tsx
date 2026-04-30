@@ -10,6 +10,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   BERRIES: "Jagody",
   CRUCIFEROUS_VEGETABLES: "Warzywa krzyżowe",
   FLAXSEED: "Siemię lniane",
+  HERBS_AND_SPICES: "Zioła i przyprawy",
 }
 
 type Props = {
@@ -28,7 +29,7 @@ export const Menu = ({ categories }: Props) => (
             style={{ width: `${Math.min(percentage * 100, 100)}%` }}
           />
         </div>
-        <div className="Menu-row--count">{total}/{required}</div>
+        <div className="Menu-row--count">{Math.round(total * 10) / 10}/{required}</div>
       </div>
     ))}
   </div>

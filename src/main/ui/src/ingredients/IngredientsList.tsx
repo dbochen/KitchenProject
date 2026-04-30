@@ -8,6 +8,7 @@ import { Search } from "../Search";
 
 type InventoryListItemProps = {
   item: InventoryItem
+  projected: number
   onUpdate: (ingredientId: number, quantity: number, unit: QuantityUnit) => void
   onRemove: (ingredient: Ingredient) => void
   onDelete: (ingredient: Ingredient) => void
@@ -15,7 +16,7 @@ type InventoryListItemProps = {
 }
 
 const InventoryListItem = (
-  { item, onUpdate, onRemove, onDelete, onTogglePerishable }: InventoryListItemProps
+  { item, projected, onUpdate, onRemove, onDelete, onTogglePerishable }: InventoryListItemProps
 ): JSX.Element => {
   const [draftQuantity, setDraftQuantity] = useState(item.quantity)
   const flagClass = [
@@ -57,6 +58,14 @@ const InventoryListItem = (
         onBlur={() => onUpdate(item.ingredient.id, draftQuantity, item.unit)}
         onFocus={e => e.target.select()}
       />
+      {projected !== item.quantity && (
+        <span className={[
+          "IngredientsList-ingredients--projected",
+          projected < 0 ? "IngredientsList-ingredients--projected-negative" : "",
+        ].join(" ").trim()}>
+          →{Math.round(projected * 100) / 100}
+        </span>
+      )}
       <select
         className="IngredientsList-ingredients--unit"
         value={item.unit}
@@ -72,6 +81,7 @@ const InventoryListItem = (
 
 type IngredientsListProps = {
   inventory: Map<number, InventoryItem>
+  projectedInventory: Map<number, number>
   onAddToInventory: (ingredient: Ingredient) => void
   onRemoveFromInventory: (ingredient: Ingredient) => void
   onUpdateInventoryItem: (ingredientId: number, quantity: number, unit: QuantityUnit) => void
@@ -81,6 +91,7 @@ type IngredientsListProps = {
 
 const IngredientsList = ({
   inventory,
+  projectedInventory,
   onAddToInventory,
   onRemoveFromInventory,
   onUpdateInventoryItem,
@@ -112,6 +123,7 @@ const IngredientsList = ({
       <InventoryListItem
         key={item.ingredient.id}
         item={item}
+        projected={projectedInventory.get(item.ingredient.id) ?? item.quantity}
         onUpdate={onUpdateInventoryItem}
         onRemove={onRemoveFromInventory}
         onDelete={onDeleteIngredient}
