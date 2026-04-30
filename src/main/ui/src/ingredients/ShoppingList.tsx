@@ -28,7 +28,9 @@ const ShoppingList = ({ deficits, mismatches }: ShoppingListProps): JSX.Element 
       {deficits.map(({ ingredient, deficit, unit }) => (
         <div key={ingredient.id} className="ShoppingList-item">
           <span className="ShoppingList-item--name">{ingredient.name}</span>
-          <span className="ShoppingList-item--amount">{deficit} {formatUnit(deficit, unit)}</span>
+          <span className="ShoppingList-item--amount">
+            {Math.round(deficit * 100) / 100} {formatUnit(deficit, unit)}
+          </span>
         </div>
       ))}
       {mismatches.length > 0 && (

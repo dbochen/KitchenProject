@@ -1,4 +1,4 @@
-import { Ingredient, Recipe } from "../recipes/model";
+import { Ingredient, InventoryItem, QuantityUnit, Recipe } from "../recipes/model";
 
 export const getRecipe = (name: string, ingredientsNames: string[] = []): Recipe => ({
   name,
@@ -17,8 +17,17 @@ export const getRecipe = (name: string, ingredientsNames: string[] = []): Recipe
   tags: [],
 })
 
-export const getIngredient = (name: string): Ingredient => ({
+export const getIngredient = (name: string, id?: number): Ingredient => ({
   name,
-  id: Math.floor(Math.random() * 1000),
+  id: id ?? Math.floor(Math.random() * 1000),
   vataBalance: "BALANCING",
 })
+
+export const getInventoryItem = (
+  ingredient: Ingredient,
+  quantity: number,
+  unit: QuantityUnit = "PIECE"
+): InventoryItem => ({ ingredient, quantity, unit })
+
+export const makeInventory = (items: InventoryItem[]): Map<number, InventoryItem> =>
+  new Map(items.map(item => [item.ingredient.id, item]))

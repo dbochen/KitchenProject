@@ -83,6 +83,43 @@ const sortRecipes = (
   });
 };
 
+export const computeProjectedInventory = (
+  inventory: Map<number, InventoryItem>,
+  selectedRecipes: Recipe[]
+): Map<number, number> => {
+  const projected = new Map<number, number>()
+  inventory.forEach((item, id) => projected.set(id, item.quantity))
+  selectedRecipes.forEach(recipe => {
+    recipe.quantifiedIngredients.forEach(qi => {
+      const candidates = [qi.ingredient, ...qi.substitutes]
+      // Use first candidate that has stock
+      let covered = false
+      for (const candidate of candidates) {
+        const inv = inventory.get(candidate.id)
+        if (!inv) continue
+        const converted = convertToUnit(qi.quantity, qi.unit, inv.unit)
+        if (converted === null) continue
+        if ((projected.get(candidate.id) ?? 0) > 0) {
+          projected.set(candidate.id, (projected.get(candidate.id) ?? 0) - converted)
+          covered = true
+          break
+        }
+      }
+      // No candidate had stock — deduct from original to surface the deficit
+      if (!covered) {
+        const inv = inventory.get(qi.ingredient.id)
+        if (inv) {
+          const converted = convertToUnit(qi.quantity, qi.unit, inv.unit)
+          if (converted !== null) {
+            projected.set(qi.ingredient.id, (projected.get(qi.ingredient.id) ?? 0) - converted)
+          }
+        }
+      }
+    })
+  })
+  return projected
+}
+
 const INVENTORY_STORAGE_KEY = "kitchenApp.inventory"
 
 const getInventoryFromStorage = (): Map<number, InventoryItem> => {
@@ -131,27 +168,10 @@ const App = (): JSX.Element => {
     setRecipes(recipesResponse)
   }
 
-  const projectedInventory = useMemo(() => {
-    const projected = new Map<number, number>()
-    inventory.forEach((item, id) => projected.set(id, item.quantity))
-    selectedRecipes.forEach(recipe => {
-      recipe.quantifiedIngredients.forEach(qi => {
-        const candidates = [qi.ingredient, ...qi.substitutes]
-        for (const candidate of candidates) {
-          const inv = inventory.get(candidate.id)
-          if (!inv) continue
-          const converted = convertToUnit(qi.quantity, qi.unit, inv.unit)
-          if (converted === null) continue
-          const current = projected.get(candidate.id) ?? 0
-          if (candidate.id === qi.ingredient.id || current > 0) {
-            projected.set(candidate.id, current - converted)
-            break
-          }
-        }
-      })
-    })
-    return projected
-  }, [inventory, selectedRecipes])
+  const projectedInventory = useMemo(
+    () => computeProjectedInventory(inventory, selectedRecipes),
+    [inventory, selectedRecipes]
+  )
 
   const chosenIngredientsNames = useMemo(() => {
     const names = new Set<string>()
