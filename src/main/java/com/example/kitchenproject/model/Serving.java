@@ -12,10 +12,12 @@ import jakarta.persistence.*;
 @Builder
 @Entity
 @NoArgsConstructor
-public class Tag {
+public class Serving {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(unique = true)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private QuantityUnit unit;
+    private double categoryServing;
 }

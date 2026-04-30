@@ -1,20 +1,22 @@
 package com.example.kitchenproject.controller;
 
 import com.example.kitchenproject.dto.RecipeInputDto;
+import com.example.kitchenproject.dto.UpdateRecipeDto;
 import com.example.kitchenproject.dto.RecipeOutputDto;
-import com.example.kitchenproject.model.Recipe;
+import com.example.kitchenproject.model.Category;
 import com.example.kitchenproject.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 import static com.example.kitchenproject.config.Config.UI_ORIGIN;
 
 @RestController
-@CrossOrigin(origins = UI_ORIGIN)
+@CrossOrigin(origins = UI_ORIGIN, methods = {RequestMethod.GET, RequestMethod.POST,
+        RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
 @Validated
 public class RecipeController {
 
@@ -25,15 +27,16 @@ public class RecipeController {
     }
 
     @GetMapping("/recipes")
-    public List<Recipe> getRecipes(
-            @RequestParam(required = false, defaultValue = "") String sort,
+    public List<RecipeOutputDto> getRecipes(
+            @RequestParam(required = false, defaultValue = "") String ingredientsSort,
+            @RequestParam(required = false) Category categorySort,
             @RequestParam(required = false, defaultValue = "") String tags
     ) {
-        return recipeService.getAllRecipes(sort, tags);
+        return recipeService.getAllRecipes(ingredientsSort, categorySort, tags);
     }
 
     @PostMapping("/recipes")
-    public Recipe addRecipe (@Valid @RequestBody RecipeInputDto recipeDto){
+    public RecipeOutputDto addRecipe(@Valid @RequestBody RecipeInputDto recipeDto) {
         return recipeService.save(recipeDto);
     }
 
@@ -50,5 +53,10 @@ public class RecipeController {
     @PutMapping("/recipes/{id}")
     public void addTags(@PathVariable Integer id, @RequestBody List<Integer> tagIds) {
         recipeService.addTagsToRecipe(id, tagIds);
+    }
+
+    @PatchMapping("/recipes/{id}/ingredients")
+    public RecipeOutputDto updateRecipe(@PathVariable Integer id, @Valid @RequestBody UpdateRecipeDto dto) {
+        return recipeService.updateRecipe(id, dto);
     }
 }

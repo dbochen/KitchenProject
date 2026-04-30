@@ -1,12 +1,11 @@
 package com.example.kitchenproject.model;
 
-import com.example.kitchenproject.dto.QuantifiedIngredientDto;
+import com.example.kitchenproject.dto.QuantifiedIngredientOutputDto;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
 
 @Data
 @AllArgsConstructor
@@ -16,10 +15,19 @@ import javax.persistence.*;
 public class QuantifiedIngredient {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @ManyToOne
     private Ingredient ingredient;
     private double quantity;
+    @Enumerated(EnumType.STRING)
     private QuantityUnit unit;
+
+    public QuantifiedIngredientOutputDto toOutputDto() {
+        return QuantifiedIngredientOutputDto.builder()
+                .unit(unit)
+                .ingredient(ingredient.toOutputDto())
+                .quantity(quantity)
+                .build();
+    }
 }

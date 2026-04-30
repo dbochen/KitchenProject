@@ -1,15 +1,20 @@
 package com.example.kitchenproject.controller;
 
-import com.example.kitchenproject.dto.IngredientDto;
+import com.example.kitchenproject.dto.IngredientInputDto;
 import com.example.kitchenproject.model.Ingredient;
 import com.example.kitchenproject.service.IngredientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static com.example.kitchenproject.config.Config.UI_ORIGIN;
 
@@ -33,8 +38,13 @@ public class IngredientController {
     }
 
     @PostMapping("/ingredients")
-    public Ingredient addIngredient(@Valid @RequestBody IngredientDto ingredientDto){
+    public Ingredient addIngredient(@Valid @RequestBody IngredientInputDto ingredientDto){
         return ingredientService.save(ingredientDto);
+    }
 
+    @DeleteMapping("/ingredients/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteIngredient(@PathVariable int id) {
+        ingredientService.delete(id);
     }
 }

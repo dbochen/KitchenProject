@@ -6,17 +6,17 @@ type SearchItem = {
   name: string,
 }
 
-interface Props {
-  onItemClick: (item: SearchItem) => void;
-  getItems: (query: string, limit: number) => Promise<SearchItem[]>
+interface Props<T extends SearchItem> {
+  onItemClick: (item: T) => void;
+  getItems: (query: string, limit: number) => Promise<T[]>
   inputPlaceholder: string;
 }
 
-export const Search = ({ onItemClick, getItems, inputPlaceholder }: Props): JSX.Element => {
+export const Search = <T extends SearchItem,>({ onItemClick, getItems, inputPlaceholder }: Props<T>): JSX.Element => {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [foundItems, setFoundItems] = useState<SearchItem[]>([]);
+  const [foundItems, setFoundItems] = useState<T[]>([]);
 
   const fetchItems = async (query: string): Promise<void> => {
     const response = await getItems(query, 5);
@@ -27,7 +27,7 @@ export const Search = ({ onItemClick, getItems, inputPlaceholder }: Props): JSX.
     fetchItems(searchQuery);
   }, [searchQuery]);
 
-  const onSearchResultClick = (item: SearchItem): void => {
+  const onSearchResultClick = (item: T): void => {
     onItemClick(item)
     setSearchQuery("")
     inputRef.current && inputRef.current.focus()

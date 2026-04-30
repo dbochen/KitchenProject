@@ -1,11 +1,13 @@
 package com.example.kitchenproject.model;
 
+import com.example.kitchenproject.dto.IngredientOutputDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +16,32 @@ import javax.persistence.*;
 @NoArgsConstructor
 public class Ingredient {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(unique = true)
     private String name;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Category category;
+    @OneToMany
+    @JoinColumn(name = "ingredient_id")
+    private List<Serving> servings;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Balance vataBalance;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Inflammation inflammation;
+    @Column
+    private String storageLocation;
+
+    public IngredientOutputDto toOutputDto() {
+        return IngredientOutputDto.builder()
+                .id(id)
+                .name(name)
+                .vataBalance(vataBalance)
+                .inflammation(inflammation)
+                .storageLocation(storageLocation)
+                .build();
+    }
 }

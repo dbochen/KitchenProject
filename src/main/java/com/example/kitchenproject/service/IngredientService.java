@@ -1,6 +1,7 @@
 package com.example.kitchenproject.service;
 
-import com.example.kitchenproject.dto.IngredientDto;
+import com.example.kitchenproject.dto.IngredientInputDto;
+import com.example.kitchenproject.exception.IngredientInUseException;
 import com.example.kitchenproject.model.Ingredient;
 import com.example.kitchenproject.repository.IngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,13 @@ public class IngredientService {
         return ingredient -> ingredient.getName().toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT));
     }
 
-    public Ingredient save(IngredientDto ingredientDto) {
+    public Ingredient save(IngredientInputDto ingredientDto) {
         return ingredientRepository.save(Ingredient.builder().name(ingredientDto.getName()).build());
+    }
+
+    public void delete(int id) {
+        long usages = ingredientRepository.countUsages(id);
+        if (usages > 0) throw new IngredientInUseException(usages);
+        ingredientRepository.deleteById(id);
     }
 }

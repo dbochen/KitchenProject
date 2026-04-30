@@ -1,17 +1,17 @@
 package com.example.kitchenproject.service;
 
+import com.example.kitchenproject.dto.QuantifiedIngredientInputDto;
 import com.example.kitchenproject.dto.RecipeInputDto;
+import com.example.kitchenproject.dto.UpdateRecipeDto;
 import com.example.kitchenproject.dto.RecipeOutputDto;
-import com.example.kitchenproject.model.Ingredient;
-import com.example.kitchenproject.model.QuantifiedIngredient;
-import com.example.kitchenproject.model.Recipe;
-import com.example.kitchenproject.model.Tag;
+import com.example.kitchenproject.model.*;
 import com.example.kitchenproject.repository.RecipeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -24,14 +24,14 @@ public class RecipeService {
         this.recipeRepository = recipeRepository;
     }
 
-    public List<Recipe> getAllRecipes(String sort, String tagsString) {
-        List<Integer> ids = Arrays.stream(sort.split(","))
-                .filter(id -> !id.equals(""))
+    public List<RecipeOutputDto> getAllRecipes(String ingredientsSort, Category categorySort, String tagsString) {
+        List<Integer> ingredientsIds = Arrays.stream(ingredientsSort.split(","))
+                .filter(id -> !id.isEmpty())
                 .map(Integer::parseInt)
                 .collect(toList());
 
         Set<Integer> tagIds = Arrays.stream(tagsString.split(","))
-                .filter(id -> !id.equals(""))
+                .filter(id -> !id.isEmpty())
                 .map(Integer::parseInt)
                 .collect(toSet());
 
@@ -41,6 +41,9 @@ public class RecipeService {
                 .findAll()
                 .stream()
                 .filter(recipe -> {
+                    if (tagIds.isEmpty()) {
+                        return true;
+                    }
                     final Set<Integer> recipeTags = recipe.getTags().stream().map(Tag::getId).collect(toSet());
                     recipeTags.retainAll(tagIds);
                     return !recipeTags.isEmpty();
@@ -55,7 +58,7 @@ public class RecipeService {
                     .collect(toList());
             double appearanceCount = 0;
 
-            for (Integer id : ids) {
+            for (Integer id : ingredientsIds) {
                 if (ingredientsFromRecipes.contains(id)) {
                     appearanceCount++;
                 }
@@ -67,14 +70,31 @@ public class RecipeService {
 
         List<Map.Entry<Recipe, Double>> entries = new ArrayList<>(result.entrySet());
 
-        return entries.stream()
-                .sorted(Comparator.comparingDouble(entry -> -entry.getValue()))
+        final List<RecipeOutputDto> sortedByIngredients = entries.stream()
+                .sorted(comparingDouble(entry -> -entry.getValue()))
                 .map(Map.Entry::getKey)
+                .map(Recipe::toRecipeOutputDto)
                 .collect(toList());
+
+        if (categorySort != null) {
+            return sortedByIngredients.stream()
+                    .sorted(comparingDouble(
+                            recipe -> -recipe.getCategoryServings().getOrDefault(categorySort, 0.0)
+                    ))
+                    .collect(toList());
+        }
+
+        return sortedByIngredients;
     }
 
-    public Recipe save(RecipeInputDto recipeDto) {
-        return recipeRepository.save(recipeDto.toRecipe());
+    public RecipeOutputDto save(RecipeInputDto recipeDto) {
+        Recipe recipe = recipeDto.toRecipe();
+        if (recipeDto.getTagIds() != null && !recipeDto.getTagIds().isEmpty()) {
+            recipe.setTags(recipeDto.getTagIds().stream()
+                    .map(tagId -> Tag.builder().id(tagId).build())
+                    .collect(toSet()));
+        }
+        return recipeRepository.save(recipe).toRecipeOutputDto();
     }
 
     public void removeRecipe(Integer id) {
@@ -89,5 +109,20 @@ public class RecipeService {
         var recipe = recipeRepository.findById(id).orElseThrow();
         recipe.setTags(tagIds.stream().map(tagId -> Tag.builder().id(tagId).build()).collect(toSet()));
         recipeRepository.save(recipe);
+    }
+
+    public RecipeOutputDto updateRecipe(Integer id, UpdateRecipeDto dto) {
+        var recipe = recipeRepository.findById(id).orElseThrow();
+        recipe.setName(dto.getName());
+        recipe.getQuantifiedIngredients().clear();
+        recipe.getQuantifiedIngredients().addAll(dto.getIngredients().stream()
+                .map(QuantifiedIngredientInputDto::toQuantifiedIngredient)
+                .collect(toList()));
+        if (dto.getTagIds() != null) {
+            recipe.setTags(dto.getTagIds().stream()
+                    .map(tagId -> Tag.builder().id(tagId).build())
+                    .collect(toSet()));
+        }
+        return recipeRepository.save(recipe).toRecipeOutputDto();
     }
 }
