@@ -94,7 +94,8 @@ public class RecipeService {
                     .map(tagId -> Tag.builder().id(tagId).build())
                     .collect(toSet()));
         }
-        return recipeRepository.save(recipe).toRecipeOutputDto();
+        Recipe saved = recipeRepository.save(recipe);
+        return recipeRepository.findById(saved.getId()).orElseThrow().toRecipeOutputDto();
     }
 
     public void removeRecipe(Integer id) {

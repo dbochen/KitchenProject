@@ -57,6 +57,16 @@ const InventoryListItem = (
         onChange={e => setDraftQuantity(Number(e.target.value))}
         onBlur={() => onUpdate(item.ingredient.id, draftQuantity, item.unit)}
         onFocus={e => e.target.select()}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            const all = Array.from(
+              document.querySelectorAll<HTMLInputElement>('.IngredientsList-ingredients--quantity')
+            )
+            const next = all[all.indexOf(e.currentTarget) + 1]
+            if (next) { next.focus(); next.select() }
+          }
+        }}
       />
       {projected !== item.quantity && (
         <span className={[

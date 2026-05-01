@@ -14,6 +14,42 @@
   min-width: 240px;
   align-items: flex-start;
 
+  &-selected {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &--list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    &--item {
+      font-size: 12px;
+      color: #666;
+    }
+  }
+
+  &-clearBtn {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #D95A40;
+      color: #D95A40;
+    }
+  }
+
   &-addRecipeBtn {
     background-color: #D95A40;
     color: #ffffff;

@@ -121,6 +121,7 @@ export const computeProjectedInventory = (
 }
 
 const INVENTORY_STORAGE_KEY = "kitchenApp.inventory"
+const SELECTED_RECIPES_STORAGE_KEY = "kitchenApp.selectedRecipeIds"
 
 const getInventoryFromStorage = (): Map<number, InventoryItem> => {
   const saved = localStorage.getItem(INVENTORY_STORAGE_KEY)
@@ -128,11 +129,18 @@ const getInventoryFromStorage = (): Map<number, InventoryItem> => {
   return new Map(JSON.parse(saved))
 }
 
+const getSelectedRecipeIdsFromStorage = (): Set<number> => {
+  const saved = localStorage.getItem(SELECTED_RECIPES_STORAGE_KEY)
+  if (!saved) return new Set()
+  return new Set(JSON.parse(saved))
+}
+
 const App = (): JSX.Element => {
 
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [inventory, setInventory] = useState<Map<number, InventoryItem>>(getInventoryFromStorage)
   const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([])
+  const [pendingSelectedIds] = useState<Set<number>>(getSelectedRecipeIdsFromStorage)
   const [allTags, setAllTags] = useState<Tag[]>([])
   const [selectedTagIds, setSelectedTagIds] = useState<Set<number>>(new Set())
   const [sortStrategy, setSortStrategy] = useState<SortStrategy>("standard")
@@ -145,8 +153,19 @@ const App = (): JSX.Element => {
   }, [])
 
   useEffect(() => {
+    if (recipes.length > 0 && pendingSelectedIds.size > 0) {
+      setSelectedRecipes(recipes.filter(r => pendingSelectedIds.has(r.id)))
+      pendingSelectedIds.clear()
+    }
+  }, [recipes])
+
+  useEffect(() => {
     localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(Array.from(inventory.entries())))
   }, [inventory])
+
+  useEffect(() => {
+    localStorage.setItem(SELECTED_RECIPES_STORAGE_KEY, JSON.stringify(selectedRecipes.map(r => r.id)))
+  }, [selectedRecipes])
 
   useEffect(() => {
     setRandomSortKeys(prev => {
@@ -288,8 +307,10 @@ const App = (): JSX.Element => {
     const partial = recipes.map((recipe, i) => {
       const ingredients = recipe.quantifiedIngredients.length > 0
         ? recipe.quantifiedIngredients
-            .filter(qi => chosenIngredientsNames.has(qi.ingredient.name)).length
-          / recipe.quantifiedIngredients.length
+            .filter(qi =>
+              chosenIngredientsNames.has(qi.ingredient.name) ||
+              qi.substitutes.some(s => chosenIngredientsNames.has(s.name))
+            ).length / recipe.quantifiedIngredients.length
         : 0;
       const balance = normalize(balanceAvgs[i], minBalance, maxBalance);
       const inflammation = 1 - normalize(inflammationAvgs[i], minInflammation, maxInflammation);
@@ -443,6 +464,18 @@ const App = (): JSX.Element => {
         </button>
         <AddTag/>
         <Menu categories={sortedCategoriesAndServings}/>
+        {selectedRecipes.length > 0 && (
+          <div className="RightPanel-selected">
+            <button className="RightPanel-clearBtn" onClick={() => setSelectedRecipes([])}>
+              Wyczyść wybrane przepisy ({selectedRecipes.length})
+            </button>
+            <ul className="RightPanel-selected--list">
+              {selectedRecipes.map(r => (
+                <li key={r.id} className="RightPanel-selected--item">{r.name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <ShoppingList deficits={shoppingListDeficits} mismatches={shoppingListMismatches}/>
         {showAddModal && (
           <EditRecipeModal
