@@ -16,6 +16,7 @@ export type Recipe = {
   balanceSum: number,
   inflammationSum: number,
   tags: string[],
+  lastCookedAt?: string,
 }
 
 export type Tag = {

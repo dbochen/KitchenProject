@@ -29,6 +29,7 @@ export interface NetworkServiceProvider {
     ingredients: Array<{ id: number, quantity: number, unit: QuantityUnit, substituteIds: number[] }>,
     tagIds: number[]
   ) => Promise<Recipe>
+  markRecipeAsCooked: (id: number) => Promise<void>
 }
 
 interface AddRecipeRequest {
@@ -72,4 +73,7 @@ export const NetworkService: NetworkServiceProvider = {
     tagIds: number[]
   ): Promise<Recipe> =>
     (await axiosInstance.patch(`/recipes/${id}/ingredients`, { name, ingredients, tagIds })).data,
+  markRecipeAsCooked: async (id: number): Promise<void> => {
+    await axiosInstance.patch(`/recipes/${id}/cook`)
+  },
 }

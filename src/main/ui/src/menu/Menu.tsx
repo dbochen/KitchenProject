@@ -1,4 +1,5 @@
 import "./Menu.scss"
+import SectionHeader from "../SectionHeader"
 
 const CATEGORY_LABELS: Record<string, string> = {
   OTHER_VEGETABLES: "Inne warzywa",
@@ -19,7 +20,7 @@ type Props = {
 
 export const Menu = ({ categories }: Props) => (
   <div className="Menu">
-    <div className="Menu-header">Codzienny tuzin</div>
+    <SectionHeader>Codzienny tuzin</SectionHeader>
     {categories.map(({ category, total, required, percentage }) => (
       <div key={category} className="Menu-row">
         <div className="Menu-row--label">{CATEGORY_LABELS[category] ?? category}</div>

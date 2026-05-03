@@ -1,24 +1,23 @@
 .ShoppingList {
-  margin-top: 16px;
-
-  &-header {
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
 
   &-item {
     display: flex;
     justify-content: space-between;
-    padding: 4px 0;
-    border-bottom: 1px solid #eee;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
 
     &--name {
       flex: 1;
     }
 
     &--amount {
-      font-weight: 500;
-      margin-left: 8px;
+      color: #bbb;
+      flex-shrink: 0;
     }
 
     &--mismatch {
@@ -26,16 +25,9 @@
     }
 
     &--mismatch-info {
-      font-size: 0.85em;
-      margin-left: 8px;
+      color: #bbb;
+      flex-shrink: 0;
     }
   }
 
-  &-mismatches-header {
-    margin-top: 12px;
-    margin-bottom: 4px;
-    font-weight: bold;
-    color: #c0392b;
-    font-size: 0.9em;
-  }
 }

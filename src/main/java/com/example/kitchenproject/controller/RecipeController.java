@@ -55,6 +55,11 @@ public class RecipeController {
         recipeService.addTagsToRecipe(id, tagIds);
     }
 
+    @PatchMapping("/recipes/{id}/cook")
+    public void markAsCooked(@PathVariable Integer id) {
+        recipeService.markAsCooked(id);
+    }
+
     @PatchMapping("/recipes/{id}/ingredients")
     public RecipeOutputDto updateRecipe(@PathVariable Integer id, @Valid @RequestBody UpdateRecipeDto dto) {
         return recipeService.updateRecipe(id, dto);

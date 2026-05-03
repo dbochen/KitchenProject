@@ -1,6 +1,7 @@
 import { Ingredient, QuantityUnit } from "../recipes/model";
 import { formatUnit } from "../recipes/formatUnit";
 import "./ShoppingList.scss";
+import SectionHeader from "../SectionHeader";
 
 export type ShoppingListDeficit = {
   ingredient: Ingredient
@@ -24,7 +25,7 @@ const ShoppingList = ({ deficits, mismatches }: ShoppingListProps): JSX.Element 
 
   return (
     <div className="ShoppingList">
-      <div className="ShoppingList-header">Lista zakupów</div>
+      <SectionHeader>Lista zakupów</SectionHeader>
       {deficits.map(({ ingredient, deficit, unit }) => (
         <div key={ingredient.id} className="ShoppingList-item">
           <span className="ShoppingList-item--name">{ingredient.name}</span>
@@ -35,7 +36,7 @@ const ShoppingList = ({ deficits, mismatches }: ShoppingListProps): JSX.Element 
       ))}
       {mismatches.length > 0 && (
         <>
-          <div className="ShoppingList-mismatches-header">Niezgodności jednostek:</div>
+          <SectionHeader>Niezgodności jednostek</SectionHeader>
           {mismatches.map(({ ingredient, inventoryUnit, recipeUnit }) => (
             <div key={ingredient.id} className="ShoppingList-item ShoppingList-item--mismatch">
               <span className="ShoppingList-item--name">{ingredient.name}</span>

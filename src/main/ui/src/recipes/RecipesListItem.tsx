@@ -46,8 +46,10 @@ const RecipesListItem = ({
 
   const { name, id, quantifiedIngredients, source } = recipe;
 
-  const getIngredientString = (ingredient: QuantifiedIngredient) =>
-    `${ingredient.ingredient.name} ${ingredient.quantity} ${formatUnit(ingredient.quantity, ingredient.unit)}`;
+  const getIngredientString = (ingredient: QuantifiedIngredient) => {
+    const qty = Math.round(ingredient.quantity * 100) / 100;
+    return `${ingredient.ingredient.name} ${qty} ${formatUnit(ingredient.quantity, ingredient.unit)}`;
+  }
 
   const ingredientsString = quantifiedIngredients
     .map(ingredient => getIngredientString(ingredient))
@@ -143,7 +145,13 @@ const RecipesListItem = ({
           Brak: {missingIngredients.map(qi => qi.ingredient.name).join(", ")}
         </div>
       )}
-      {Object.keys(recipe.categoryServings).length > 0 && (
+      {recipe.lastCookedAt && (
+    <div className={"RecipesListItem-lastCooked"}>
+      Ostatnio użyte: {new Date(recipe.lastCookedAt).toLocaleDateString(
+        'pl-PL', { day: 'numeric', month: 'short', year: 'numeric' })}
+    </div>
+  )}
+  {Object.keys(recipe.categoryServings).length > 0 && (
         <div className={"RecipesListItem-categoryServings"}>
           {Object.entries(recipe.categoryServings)
             .map(([cat, val]) => `${CATEGORY_LABELS[cat] ?? cat}: ${Math.round(val * 10) / 10}`)

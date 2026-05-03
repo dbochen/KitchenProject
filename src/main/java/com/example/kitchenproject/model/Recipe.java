@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class Recipe {
     @ManyToMany
     @Builder.Default
     private Set<Tag> tags = new HashSet<>();
+    private LocalDateTime lastCookedAt;
 
     public RecipeOutputDto toRecipeOutputDto() {
         return RecipeOutputDto.builder()
@@ -74,6 +76,7 @@ public class Recipe {
                                 Integer::sum
                         )
                 )
+                .lastCookedAt(lastCookedAt != null ? lastCookedAt.toString() : null)
                 .build();
     }
 

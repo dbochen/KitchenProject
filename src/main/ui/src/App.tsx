@@ -13,6 +13,7 @@ import { Menu } from "./menu/Menu";
 import ShoppingList from "./ingredients/ShoppingList";
 import { SortStrategy } from "./recipes/SortStrategyPicker";
 import { areCompatibleUnits, convertToUnit } from "./convertUnits";
+import SectionHeader from "./SectionHeader";
 import * as _ from "lodash";
 
 const normalize = (value: number, min: number, max: number): number =>
@@ -33,6 +34,12 @@ const gregersScore = (recipe: Recipe, categoryDeficiencies: Record<string, numbe
     (sum, [cat, def]) => sum + (recipe.categoryServings[cat] ?? 0) * def, 0
   );
 
+const recencyPenalty = (recipe: Recipe): number => {
+  if (!recipe.lastCookedAt) return 0
+  const days = (Date.now() - new Date(recipe.lastCookedAt).getTime()) / (1000 * 60 * 60 * 24)
+  return Math.max(0, 28 - days) * 10
+}
+
 const sortRecipes = (
   recipesInput: Recipe[],
   strategy: SortStrategy,
@@ -48,7 +55,8 @@ const sortRecipes = (
     ).length * 5;
 
   if (strategy === "random") {
-    return _.sortBy(recipesInput, (r: Recipe) => (randomSortKeys.get(r.id) ?? 0) - perishableBonus(r));
+    return _.sortBy(recipesInput,
+      (r: Recipe) => (randomSortKeys.get(r.id) ?? 0) - perishableBonus(r) + recencyPenalty(r));
   }
 
   const balanceAvgs = recipesInput.map(avgBalance);
@@ -75,11 +83,12 @@ const sortRecipes = (
 
     const standardScore = matchedRatio + balanceNorm - inflammationNorm + servingsNorm;
     const urgent = perishableBonus(recipe);
-    if (strategy === "ingredients") return -(matchedRatio * 1000 + standardScore + urgent);
-    if (strategy === "balance") return -(balanceNorm * 1000 + standardScore + urgent);
-    if (strategy === "inflammation") return inflammationNorm * 1000 - standardScore - urgent;
-    if (strategy === "servings") return -(servingsNorm * 1000 + standardScore + urgent);
-    return -(standardScore + urgent);
+    const stale = recencyPenalty(recipe);
+    if (strategy === "ingredients") return -(matchedRatio * 1000 + standardScore + urgent) + stale;
+    if (strategy === "balance") return -(balanceNorm * 1000 + standardScore + urgent) + stale;
+    if (strategy === "inflammation") return inflammationNorm * 1000 - standardScore - urgent + stale;
+    if (strategy === "servings") return -(servingsNorm * 1000 + standardScore + urgent) + stale;
+    return -(standardScore + urgent) + stale;
   });
 };
 
@@ -278,6 +287,28 @@ const App = (): JSX.Element => {
     );
   }, [selectedRecipes]);
 
+  const leastUsedIngredients = useMemo(() => {
+    const counts = new Map<number, { name: string, count: number }>()
+    inventory.forEach(item =>
+      counts.set(item.ingredient.id, { name: item.ingredient.name, count: 0 })
+    )
+    recipes.forEach(recipe => {
+      recipe.quantifiedIngredients.forEach(qi => {
+        if (counts.has(qi.ingredient.id)) {
+          counts.get(qi.ingredient.id)!.count++
+        }
+        qi.substitutes.forEach(s => {
+          if (counts.has(s.id)) {
+            counts.get(s.id)!.count++
+          }
+        })
+      })
+    })
+    return Array.from(counts.values())
+      .sort((a, b) => a.count - b.count)
+      .slice(0, 10)
+  }, [inventory, recipes])
+
   const perishableIngredientNames = useMemo(() => {
     const names = new Set<string>()
     inventory.forEach(item => {
@@ -356,6 +387,20 @@ const App = (): JSX.Element => {
     const next = new Map(inventory)
     next.set(ingredient.id, { ...item, perishable: !item.perishable })
     setInventory(next)
+  }
+
+  const onCookSelectedRecipes = () => {
+    const next = new Map(inventory)
+    projectedInventory.forEach((projected, id) => {
+      const item = next.get(id)
+      if (item) next.set(id, { ...item, quantity: Math.max(0, projected) })
+    })
+    setInventory(next)
+    const now = new Date().toISOString()
+    const cookedIds = new Set(selectedRecipes.map(r => r.id))
+    selectedRecipes.forEach(r => NetworkService.markRecipeAsCooked(r.id))
+    setRecipes(prev => prev.map(r => cookedIds.has(r.id) ? { ...r, lastCookedAt: now } : r))
+    setSelectedRecipes([])
   }
 
   const onDeleteIngredient = (ingredient: Ingredient) => {
@@ -466,6 +511,9 @@ const App = (): JSX.Element => {
         <Menu categories={sortedCategoriesAndServings}/>
         {selectedRecipes.length > 0 && (
           <div className="RightPanel-selected">
+            <button className="RightPanel-cookBtn" onClick={onCookSelectedRecipes}>
+              Ugotuj!
+            </button>
             <button className="RightPanel-clearBtn" onClick={() => setSelectedRecipes([])}>
               Wyczyść wybrane przepisy ({selectedRecipes.length})
             </button>
@@ -477,6 +525,19 @@ const App = (): JSX.Element => {
           </div>
         )}
         <ShoppingList deficits={shoppingListDeficits} mismatches={shoppingListMismatches}/>
+        {leastUsedIngredients.length > 0 && (
+          <div className="RightPanel-leastUsed">
+            <SectionHeader>Rzadko używane składniki</SectionHeader>
+            <ul className="RightPanel-leastUsed--list">
+              {leastUsedIngredients.map(({ name, count }) => (
+                <li key={name} className="RightPanel-leastUsed--item">
+                  {name}
+                  <span className="RightPanel-leastUsed--count">{count}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {showAddModal && (
           <EditRecipeModal
             allTags={allTags}

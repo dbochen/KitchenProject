@@ -18,4 +18,5 @@ public class RecipeOutputDto {
     private Map<Category, Double> categoryServings;
     private int balanceSum;
     private int inflammationSum;
+    private String lastCookedAt;
 }

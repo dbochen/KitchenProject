@@ -6,9 +6,12 @@ import com.example.kitchenproject.dto.UpdateRecipeDto;
 import com.example.kitchenproject.dto.RecipeOutputDto;
 import com.example.kitchenproject.model.*;
 import com.example.kitchenproject.repository.RecipeRepository;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static java.util.Comparator.comparingDouble;
@@ -19,9 +22,12 @@ import static java.util.stream.Collectors.toSet;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final EntityManager entityManager;
 
-    public RecipeService(@Autowired RecipeRepository recipeRepository) {
+    public RecipeService(@Autowired RecipeRepository recipeRepository,
+                         @Autowired EntityManager entityManager) {
         this.recipeRepository = recipeRepository;
+        this.entityManager = entityManager;
     }
 
     public List<RecipeOutputDto> getAllRecipes(String ingredientsSort, Category categorySort, String tagsString) {
@@ -87,6 +93,7 @@ public class RecipeService {
         return sortedByIngredients;
     }
 
+    @Transactional
     public RecipeOutputDto save(RecipeInputDto recipeDto) {
         Recipe recipe = recipeDto.toRecipe();
         if (recipeDto.getTagIds() != null && !recipeDto.getTagIds().isEmpty()) {
@@ -95,6 +102,8 @@ public class RecipeService {
                     .collect(toSet()));
         }
         Recipe saved = recipeRepository.save(recipe);
+        entityManager.flush();
+        entityManager.clear();
         return recipeRepository.findById(saved.getId()).orElseThrow().toRecipeOutputDto();
     }
 
@@ -109,6 +118,12 @@ public class RecipeService {
     public void addTagsToRecipe(Integer id, List<Integer> tagIds) {
         var recipe = recipeRepository.findById(id).orElseThrow();
         recipe.setTags(tagIds.stream().map(tagId -> Tag.builder().id(tagId).build()).collect(toSet()));
+        recipeRepository.save(recipe);
+    }
+
+    public void markAsCooked(Integer id) {
+        var recipe = recipeRepository.findById(id).orElseThrow();
+        recipe.setLastCookedAt(LocalDateTime.now());
         recipeRepository.save(recipe);
     }
 
